@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import static com.androidandyuk.autobuddy.Fuelling.loadFuels;
 import static com.androidandyuk.autobuddy.MainActivity.activeBike;
 import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
 import static com.androidandyuk.autobuddy.MainActivity.bikes;
@@ -48,8 +49,6 @@ import static com.androidandyuk.autobuddy.MainActivity.sdf;
 import static com.androidandyuk.autobuddy.Maintenance.loadLogs;
 
 public class Garage extends AppCompatActivity {
-
-//    public static ArrayList<Bike> bikes = new ArrayList<>();
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
@@ -83,7 +82,7 @@ public class Garage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.androidandyuk.autobuddy.R.layout.activity_garage);
+        setContentView(R.layout.activity_garage);
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -99,15 +98,15 @@ public class Garage extends AppCompatActivity {
 //        }
 
         // for adding a new bike
-        bikeMake = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.bikeMake);
-        bikeModel = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.bikeModel);
-        bikeYear = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.bikeYear);
-        bikeEstMileage = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.estMileage);
-        amountSpent = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.amountSpent);
-        myRegView = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.clickable_reg_view);
-        MOTdue = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.MOTdue);
-        serviceDue = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.serviceDue);
-        taxDue = (Spinner) findViewById(com.androidandyuk.autobuddy.R.id.taxSpinner);
+        bikeMake = (EditText) findViewById(R.id.bikeMake);
+        bikeModel = (EditText) findViewById(R.id.bikeModel);
+        bikeYear = (EditText) findViewById(R.id.bikeYear);
+        bikeEstMileage = (TextView) findViewById(R.id.estMileage);
+        amountSpent = (TextView) findViewById(R.id.amountSpent);
+        myRegView = (TextView) findViewById(R.id.clickable_reg_view);
+        MOTdue = (TextView) findViewById(R.id.MOTdue);
+        serviceDue = (TextView) findViewById(R.id.serviceDue);
+        taxDue = (Spinner) findViewById(R.id.taxSpinner);
 
 
         taxDue.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, TaxDue.values()));
@@ -204,19 +203,20 @@ public class Garage extends AppCompatActivity {
     }
 
     public void garageSetup() {
-        bikeTitle = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.bikeTitle);
+        bikeTitle = (TextView) findViewById(R.id.bikeTitle);
 //        regSwitcher = (ViewSwitcher) findViewById(R.id.regSwitcher);
-        aveMPG = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.aveMPG);
-        bikeEstMileage = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.estMileage);
-        amountSpent = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.amountSpent);
-        bikeNotes = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.bikeNotes);
+        aveMPG = (TextView) findViewById(R.id.aveMPG);
+        bikeEstMileage = (TextView) findViewById(R.id.estMileage);
+        amountSpent = (TextView) findViewById(R.id.amountSpent);
+        bikeNotes = (EditText) findViewById(R.id.bikeNotes);
         bikeNotes.setSelected(false);
-        myRegView = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.clickable_reg_view);
-        MOTdue = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.MOTdue);
-        serviceDue = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.serviceDue);
-        taxDue = (Spinner) findViewById(com.androidandyuk.autobuddy.R.id.taxSpinner);
+        myRegView = (TextView) findViewById(R.id.clickable_reg_view);
+        MOTdue = (TextView) findViewById(R.id.MOTdue);
+        serviceDue = (TextView) findViewById(R.id.serviceDue);
+        taxDue = (Spinner) findViewById(R.id.taxSpinner);
 
         setListeners();
+        calcEstMileage();
 
         // check the user has a bike, then set all the views to it's current details
         if (bikes.size() > 0) {
@@ -251,9 +251,9 @@ public class Garage extends AppCompatActivity {
             MOTdue.setText(bikes.get(activeBike).MOTdue);
             Calendar testDate = new GregorianCalendar();
             if (MainActivity.checkInRange(bikes.get(activeBike).MOTdue, testDate)) {
-                MOTdue.setBackground(getResources().getDrawable(com.androidandyuk.autobuddy.R.drawable.rounded_corners_red));
+                MOTdue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_red));
             } else {
-                MOTdue.setBackground(getResources().getDrawable(com.androidandyuk.autobuddy.R.drawable.rounded_corners_grey_orange));
+                MOTdue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey_orange));
             }
 //            }
 
@@ -263,9 +263,9 @@ public class Garage extends AppCompatActivity {
             serviceDue.setText(bikes.get(activeBike).serviceDue);
             testDate = new GregorianCalendar();
             if (MainActivity.checkInRange(bikes.get(activeBike).serviceDue, testDate)) {
-                serviceDue.setBackground(getResources().getDrawable(com.androidandyuk.autobuddy.R.drawable.rounded_corners_red));
+                serviceDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_red));
             } else {
-                serviceDue.setBackground(getResources().getDrawable(com.androidandyuk.autobuddy.R.drawable.rounded_corners_grey_orange));
+                serviceDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey_orange));
             }
 
             // check Tax is due this month
@@ -275,21 +275,21 @@ public class Garage extends AppCompatActivity {
             Log.i("Current Month", "" + Calendar.getInstance().get(Calendar.MONTH));
             Log.i("Tax Month", "" + getEnumPos(bikes.get(activeBike).taxDue));
             if (currentMonth == taxMonth) {
-                taxDue.setBackground(getResources().getDrawable(com.androidandyuk.autobuddy.R.drawable.rounded_corners_red));
+                taxDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_red));
             } else {
-                taxDue.setBackground(getResources().getDrawable(com.androidandyuk.autobuddy.R.drawable.rounded_corners_grey_orange));
+                taxDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey_orange));
             }
         }
     }
 
     public void checkBackground() {
-        main = (ConstraintLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
-        if(backgroundsWanted){
-            int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
+        main = (ConstraintLayout) findViewById(R.id.main);
+        if (backgroundsWanted) {
+            int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Garage.main.setBackground(drawablePic);
         } else {
-            Garage.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            Garage.main.setBackgroundColor(getResources().getColor(R.color.background));
         }
     }
 
@@ -313,7 +313,7 @@ public class Garage extends AppCompatActivity {
 
             DatePickerDialog dialog = new DatePickerDialog(
                     Garage.this,
-                    com.androidandyuk.autobuddy.R.style.datepicker,
+                    R.style.datepicker,
                     MOTDateSetListener,
                     year, month, day);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.LTGRAY));
@@ -340,7 +340,7 @@ public class Garage extends AppCompatActivity {
 
             DatePickerDialog dialog = new DatePickerDialog(
                     Garage.this,
-                    com.androidandyuk.autobuddy.R.style.datepicker,
+                    R.style.datepicker,
                     serviceDateSetListener,
                     year, month, day);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.LTGRAY));
@@ -367,7 +367,7 @@ public class Garage extends AppCompatActivity {
 
     public void addBike(View view) {
         Log.i("Bike", "Add bike");
-        View addingBikeInfo = findViewById(com.androidandyuk.autobuddy.R.id.addingBikeInfo);
+        View addingBikeInfo = findViewById(R.id.addingBikeInfo);
 
         // clear out any previous details
         bikeMake.setText("");
@@ -406,7 +406,7 @@ public class Garage extends AppCompatActivity {
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(viewAddBike.getWindowToken(), 0);
                 }
-                View addingBikeInfo = findViewById(com.androidandyuk.autobuddy.R.id.addingBikeInfo);
+                View addingBikeInfo = findViewById(R.id.addingBikeInfo);
                 addingBikeInfo.setVisibility(View.INVISIBLE);
                 invalidateOptionsMenu();
 
@@ -453,9 +453,9 @@ public class Garage extends AppCompatActivity {
     public void getDetails(String hint) {
         Log.i("Get Details", hint);
 //        final String[] detail = new String[1];
-        final View getDetails = findViewById(com.androidandyuk.autobuddy.R.id.getDetails);
+        final View getDetails = findViewById(R.id.getDetails);
         getDetails.setVisibility(View.VISIBLE);
-        final EditText reg = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.getDetailsText);
+        final EditText reg = (EditText) findViewById(R.id.getDetailsText);
         reg.setHint(hint);
 
         reg.setFocusableInTouchMode(true);
@@ -470,7 +470,7 @@ public class Garage extends AppCompatActivity {
                     detail = reg.getText().toString().toUpperCase();
                     getDetails.setVisibility(View.INVISIBLE);
                     bikes.get(activeBike).registration = detail;
-                    myRegView = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.clickable_reg_view);
+                    myRegView = (TextView) findViewById(R.id.clickable_reg_view);
                     myRegView.setText(detail);
                     saveBikes();
                     return true;
@@ -513,6 +513,78 @@ public class Garage extends AppCompatActivity {
         Toast.makeText(Garage.this, "Costs are calculated from your maintenance logs, not set here", Toast.LENGTH_LONG).show();
     }
 
+    public void calcEstMileage() {
+        if(activeBike>-1) {
+            loadLogs();
+            loadFuels();
+            Log.i("Garage", "calcEstMileage");
+            Bike thisBike = bikes.get(activeBike);
+            Date lastMaintDate = new Date(90, 1, 1);
+            Date lastFuelDate = new Date(90, 1, 1);
+            Date lastDate = new Date(90, 1, 1);
+            double lastMaintMileage = 0;
+            double lastFuelMileage = 0;
+            double lastMileage = 0;
+
+            int maintLogs = thisBike.maintenanceLogs.size();
+            int fuelLogs = thisBike.fuelings.size();
+
+            Log.i("LogCount", "M:" + maintLogs + " F:" + fuelLogs);
+
+            //find the last maintenance log with a mileage
+            for (int i = maintLogs - 1; i >= 0; i--) {
+                if (thisBike.maintenanceLogs.get(i).mileage > 0) {
+                    try {
+                        lastMaintDate = sdf.parse(thisBike.maintenanceLogs.get(i).date);
+
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    lastMaintMileage = thisBike.maintenanceLogs.get(i).mileage;
+                }
+            }
+            Log.i("LastMaint", "Mileage " + lastMaintMileage);
+
+            //find the last fuel log with a mileage
+            for (int i = fuelLogs - 1; i >= 0; i--) {
+                if (thisBike.fuelings.get(i).mileage > 1) {
+                    try {
+                        lastFuelDate = sdf.parse(thisBike.fuelings.get(i).date);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    lastFuelMileage = thisBike.fuelings.get(i).mileage;
+                }
+            }
+            Log.i("LastFuel", "Mileage " + lastFuelMileage);
+
+            //check which is newer and make that the mileage we're using
+            if (lastMaintDate.after(lastFuelDate)) {
+                lastMileage = lastMaintMileage;
+                lastDate = lastMaintDate;
+            } else {
+                lastMileage = lastFuelMileage;
+                lastDate = lastFuelDate;
+            }
+
+            Log.i("LastEither", "Mileage " + lastMileage);
+
+            // now add any miles from fuel ups that happened after the last date
+            for (int i = 0; i < fuelLogs; i++) {
+                Date testDate = null;
+                try {
+                    testDate = sdf.parse(thisBike.fuelings.get(i).date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                if (testDate.after(lastDate)) {
+                    lastMileage += thisBike.fuelings.get(i).miles;
+                }
+            }
+            thisBike.estMileage = lastMileage;
+        }
+    }
+
     @Override
     public void onBackPressed() {
         // this must be empty as back is being dealt with in onKeyDown
@@ -522,8 +594,8 @@ public class Garage extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             //assign the views that could be showing, to check if they are showing when back is pressed
-            View addingBikeInfo = findViewById(com.androidandyuk.autobuddy.R.id.addingBikeInfo);
-            View getDetails = findViewById(com.androidandyuk.autobuddy.R.id.getDetails);
+            View addingBikeInfo = findViewById(R.id.addingBikeInfo);
+            View getDetails = findViewById(R.id.getDetails);
             if (addingBikeInfo.isShown() || getDetails.isShown()) {
                 addingBikeInfo.setVisibility(View.INVISIBLE);
                 getDetails.setVisibility(View.INVISIBLE);
@@ -537,7 +609,7 @@ public class Garage extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(com.androidandyuk.autobuddy.R.menu.bike_choice, menu);
+        getMenuInflater().inflate(R.menu.bike_choice, menu);
         super.onCreateOptionsMenu(menu);
 
         menu.add(0, 0, 0, "Settings").setShortcut('3', 'c');
@@ -554,7 +626,7 @@ public class Garage extends AppCompatActivity {
 
         if (activeBike > -1) {
             // save any changes in Bike notes
-            bikeNotes = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.bikeNotes);
+            bikeNotes = (EditText) findViewById(R.id.bikeNotes);
             bikes.get(activeBike).notes = bikeNotes.getText().toString();
         }
         // change to bike selected
@@ -617,10 +689,10 @@ public class Garage extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        taxDue = (Spinner) findViewById(com.androidandyuk.autobuddy.R.id.taxSpinner);
+        taxDue = (Spinner) findViewById(R.id.taxSpinner);
         String thisTaxDue = taxDue.getSelectedItem().toString();
         Log.i("Tax is due", thisTaxDue);
-        bikeNotes = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.bikeNotes);
+        bikeNotes = (EditText) findViewById(R.id.bikeNotes);
         // check there's actually a bike before saving the notes
         if (bikeNotes != null && bikes.size() > 0) {
             bikes.get(activeBike).notes = bikeNotes.getText().toString();
@@ -639,6 +711,7 @@ public class Garage extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i("Garage","onResume");
         garageSetup();
         checkBackground();
     }

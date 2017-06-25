@@ -100,6 +100,7 @@
         <activity
             android:name=".Maintenance"
             android:label="Maintenance"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".GroupRide"

@@ -78,6 +78,8 @@ public class Traffic extends AppCompatActivity {
         // decide if a new update is required
         updateTraffic = false;
 
+        loadUpdateTime();
+
         Calendar now = Calendar.getInstance();
 
         int currentMins = now.get(Calendar.MINUTE) + (now.get(Calendar.HOUR_OF_DAY) * 60);

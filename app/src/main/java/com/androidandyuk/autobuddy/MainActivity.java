@@ -717,42 +717,6 @@ public class MainActivity extends AppCompatActivity {
         ed.putInt("bikesSize", 0);
     }
 
-//    public void SendLogcatMail(){
-//
-//
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_LOGS) == PackageManager.PERMISSION_GRANTED) {
-//            Log.d(getLocalClassName(), "Got READ_LOGS permissions");
-//        } else {
-//            Log.e(getLocalClassName(), "Don't have READ_LOGS permissions");
-//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_LOGS}, 103);
-//            Log.i(getLocalClassName(), "new READ_LOGS permission: " + ContextCompat.checkSelfPermission(this, Manifest.permission.READ_LOGS));
-//        }
-//
-//        // save logcat in file
-//        File outputFile = new File(downloadsDir,
-//                "logcat.txt");
-//        Log.i("SendLoagcatMail: ", "logcat file is " + outputFile.getAbsolutePath());
-//        try {
-//            Runtime.getRuntime().exec(
-//                    "logcat -f " + outputFile.getAbsolutePath());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            Log.e(getLocalClassName(), "Alas error! ", e);
-//        }
-//
-//        //send file using email
-//        Intent emailIntent = new Intent(Intent.ACTION_SEND);
-//        // Set type to "email"
-//        emailIntent.setType("vnd.android.cursor.dir/email");
-//        String to[] = {"vishvas.vasuki+STARDICTAPP@gmail.com"};
-//        emailIntent.putExtra(Intent.EXTRA_EMAIL, to);
-//        // the attachment
-//        emailIntent .putExtra(Intent.EXTRA_STREAM, Uri.fromFile(outputFile));
-//        // the mail subject
-//        emailIntent .putExtra(Intent.EXTRA_SUBJECT, "Stardict Updater App Failure report.");
-//        startActivity(Intent.createChooser(emailIntent , "Email failure report to maker?..."));
-//    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

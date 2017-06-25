@@ -70,15 +70,12 @@ public class Maintenance extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.androidandyuk.autobuddy.R.layout.activity_maintenance);
+        setContentView(R.layout.activity_maintenance);
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // until I implement landscape view, lock the orientation
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-        sharedPreferences = this.getSharedPreferences("com.androidandyuk.autobuddy", Context.MODE_PRIVATE);
-        ed = sharedPreferences.edit();
 
         loadLogs();
         initiateList();
@@ -144,7 +141,7 @@ public class Maintenance extends AppCompatActivity {
     }
 
     public void setSearch(View view) {
-        EditText search = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.searchBox);
+        EditText search = (EditText) findViewById(R.id.searchBox);
 
         searchItem = search.getText().toString();
 
@@ -181,7 +178,7 @@ public class Maintenance extends AppCompatActivity {
 
         DatePickerDialog dialog = new DatePickerDialog(
                 Maintenance.this,
-                com.androidandyuk.autobuddy.R.style.datepicker,
+                R.style.datepicker,
                 logDateSetListener,
                 year, month, day);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.LTGRAY));
@@ -190,7 +187,7 @@ public class Maintenance extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(com.androidandyuk.autobuddy.R.menu.bike_choice, menu);
+        getMenuInflater().inflate(R.menu.bike_choice, menu);
 
         super.onCreateOptionsMenu(menu);
 
@@ -264,7 +261,7 @@ public class Maintenance extends AppCompatActivity {
     }
 
     private void initiateList() {
-        maintList = (ListView) findViewById(com.androidandyuk.autobuddy.R.id.maintList);
+        maintList = (ListView) findViewById(R.id.maintList);
 
         myAdapter = new MyMaintenanceAdapter(bikes.get(activeBike).maintenanceLogs);
 
@@ -303,12 +300,12 @@ public class Maintenance extends AppCompatActivity {
 
             if (searchItem == "" || s.log.toLowerCase().contains(searchItem.toLowerCase())) {
                 LayoutInflater mInflater = getLayoutInflater();
-                View myView = mInflater.inflate(com.androidandyuk.autobuddy.R.layout.maintenance_listview, null);
+                View myView = mInflater.inflate(R.layout.maintenance_listview, null);
 
-                TextView maintenanceListDate = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.maintenanceListDate);
+                TextView maintenanceListDate = (TextView) myView.findViewById(R.id.maintenanceListDate);
                 maintenanceListDate.setText(s.date);
 
-                TextView maintenanceListMileage = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.maintenanceListMileage);
+                TextView maintenanceListMileage = (TextView) myView.findViewById(R.id.maintenanceListMileage);
                 Double thisMiles = s.mileage;
 
                 // check what setting the user has, Miles or Km
@@ -319,10 +316,10 @@ public class Maintenance extends AppCompatActivity {
 
                 maintenanceListMileage.setText(milesSetting + ":" +(oneDecimal.format(thisMiles)));
 
-                TextView maintenanceListLog = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.maintenanceListLog);
+                TextView maintenanceListLog = (TextView) myView.findViewById(R.id.maintenanceListLog);
                 maintenanceListLog.setText(s.log);
 
-                TextView maintenanceListCost = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.maintenanceListCost);
+                TextView maintenanceListCost = (TextView) myView.findViewById(R.id.maintenanceListCost);
                 String text = currencySetting + precision.format(s.price);
                 if (s.price == 0) {
                     text = "";
@@ -332,20 +329,20 @@ public class Maintenance extends AppCompatActivity {
                 return myView;
             } else {
                 LayoutInflater mInflater = getLayoutInflater();
-                View myView = mInflater.inflate(com.androidandyuk.autobuddy.R.layout.blank, null);
+                View myView = mInflater.inflate(R.layout.blank, null);
                 return myView;
             }
         }
     }
 
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
+        main = (RelativeLayout) findViewById(R.id.main);
         if(backgroundsWanted){
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Maintenance.main.setBackground(drawablePic);
         } else {
-            Maintenance.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            Maintenance.main.setBackgroundColor(getResources().getColor(R.color.background));
         }
     }
 
@@ -424,7 +421,7 @@ public class Maintenance extends AppCompatActivity {
         for (Bike thisBike : bikes) {
             thisBike.maintenanceLogs.clear();
 
-            Log.i("Loading Logs", "" + thisBike);
+            Log.i("LoadingMaintLogs", "" + thisBike);
 
             ArrayList<String> dates = new ArrayList<>();
             ArrayList<String> logs = new ArrayList<>();

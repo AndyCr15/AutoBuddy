@@ -30,33 +30,12 @@ public class fuellingDetails implements Comparable<fuellingDetails> {
 
     public fuellingDetails(double miles, double price, double litres, String date, double mileage) {
         // adding a brand new fueling
-
         this.miles = miles;
         this.price = price;
         this.litres = litres;
         mpg = miles / (litres / 4.54609);
         this.date = date;
         this.mileage = mileage;
-
-//        // being sent in with a date means it's from an edit or a save
-//        Date todaysDate = new Date();
-//        String formattedDate = sdf.format(todaysDate);
-//        // check if it's still the same day, allow mileage to be changed
-//        if (date.equals(formattedDate)) {
-//            if (mileage != 0 && mileage > MainActivity.bikes.get(activeBike).estMileage) {
-//                MainActivity.bikes.get(activeBike).estMileage = mileage;
-//                this.mileage = mileage;
-//            } else if (mileage != 0) {
-//                Context context = App.getContext();
-//                Toast.makeText(context, "The mileage appears to be lower than current est mileage. Not applied", Toast.LENGTH_LONG).show();
-//            } else {
-//                // mileage has been left blank
-//                MainActivity.bikes.get(activeBike).estMileage += miles;
-//            }
-//        } else {
-//            Context context = App.getContext();
-//            Toast.makeText(context, "You can't change mileage from previous days entries. It will update the next time you provide the mileage", Toast.LENGTH_LONG).show();
-//        }
     }
 
     public String getDate() {
@@ -83,12 +62,10 @@ public class fuellingDetails implements Comparable<fuellingDetails> {
         return mileage;
     }
 
-//    @Override
-//    public String toString() {
-//        DecimalFormat df = new DecimalFormat();
-//        df.setMaximumFractionDigits(2);
-//        return this.date + " - Miles : " + miles + " - mpg = " + df.format(mpg);
-//    }
+    @Override
+    public String toString() {
+        return "Date" + date + " Miles " + miles;
+    }
 
     @Override
     public int compareTo(@NonNull fuellingDetails o) {

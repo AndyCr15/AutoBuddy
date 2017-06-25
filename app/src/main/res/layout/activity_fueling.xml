@@ -244,7 +244,7 @@
                 android:textSize="18sp" />
 
             <EditText
-                android:id="@+id/mileage"
+                android:id="@+id/mileageET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
