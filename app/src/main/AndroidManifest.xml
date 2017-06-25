@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.androidandyuk.autobuddy">
+
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality. 
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="fractal5.mythirdapp.permission.MAPS_RECEIVE" />
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:backupAgent=".MyBackupAgent"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:logo="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBhnz3jukkMW4OSi9TjXnTCCCVHDC7r37A" />
+        <!--<meta-data-->
+            <!--android:name="com.google.android.backup.api_key"-->
+            <!--android:value="AEdPqrEAAAAILBrSZaiKBIa1ylQupITalbvc9ZFsfI-Nvl-jiw" />-->
+
+        <activity
+            android:name=".SplashScreen"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:label="Auto Buddy"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Favourites"
+            android:label="Favourites"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".MapsActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".AboutActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".RaceTracks"
+            android:label="Tracks"
+            android:theme="@style/AppTheme" />
+        <!--<activity-->
+        <!--android:name=".Settings"-->
+        <!--android:label="Settings"-->
+        <!--android:theme="@style/SettingsTheme" />-->
+        <activity
+            android:name=".LocationInfoActivity"
+            android:label="@string/title_activity_location_info"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Locations"
+            android:label="Locations"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Traffic"
+            android:label="Traffic"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".HotSpots"
+            android:label="Hot Spots"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Fuelling"
+            android:label="Fueling"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Garage"
+            android:label="Garage"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Maintenance"
+            android:label="Maintenance"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".GroupRide"
+            android:label="Group Ride"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings" />
+        <activity
+            android:name=".SendFeedback"
+            android:label="Send Feedback"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".PetrolPrices" />
+        <activity
+            android:name=".MaintenanceLog"
+            android:label="Maintenance Log"
+            android:windowSoftInputMode="adjustPan"
+            />
+        <activity
+            android:name=".PartsLog"
+            android:label="Parts Log" />
+        <activity
+            android:name=".ToDo"
+            android:label="To Do List" />
+        <activity
+            android:name=".CarShows"
+            android:label="Auto Shows" />
+        <activity
+            android:name=".Settings"
+            android:label="Settings"></activity>
+    </application>
+
+</manifest>

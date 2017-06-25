@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MaintenanceLog">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical">
+
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="8dp"
+            ads:adSize="BANNER"
+            ads:adUnitId="@string/banner_ad_unit_id">
+
+        </com.google.android.gms.ads.AdView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/setLogDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="2"
+                android:background="@drawable/rounded_corners_grey_orange"
+                android:hint="date"
+                android:inputType="numberDecimal"
+                android:onClick="setLogDate"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/logMileage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="2"
+                android:background="@drawable/rounded_corners_grey_orange"
+                android:hint="mileage"
+                android:inputType="number"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/logCost"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="2"
+                android:background="@drawable/rounded_corners_grey_orange"
+                android:hint="cost"
+                android:inputType="numberDecimal"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/logString"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_corners_grey_orange"
+            android:ems="10"
+            android:gravity="top"
+            android:hint="Enter log details"
+            android:inputType="textCapSentences"
+            android:maxHeight="150dp"
+            android:minHeight="76dp"
+            android:padding="5dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ToggleButton
+                    android:id="@+id/brakePads"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Brake Pads"
+                    android:textOn="Brake Pads" />
+
+                <ToggleButton
+                    android:id="@+id/brakeDiscs"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Brake Discs"
+                    android:textOn="Brake Discs" />
+
+                <ToggleButton
+                    android:id="@+id/frontTyre"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Front Tyre"
+                    android:textOn="Front Tyre" />
+
+                <ToggleButton
+                    android:id="@+id/rearTyre"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Rear Tyre"
+                    android:textOn="Rear Tyre" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ToggleButton
+                    android:id="@+id/oilChange"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Oil Chng"
+                    android:textOn="Oil Chng"
+                    android:textSize="12sp" />
+
+                <ToggleButton
+                    android:id="@+id/newBattery"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="New Battery"
+                    android:textOn="New Battery" />
+
+                <ToggleButton
+                    android:id="@+id/coolantChange"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Coolant Change"
+                    android:textOn="Coolant Change"
+                    android:textSize="10sp" />
+
+                <ToggleButton
+                    android:id="@+id/sparkPlugs"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Spark Plugs"
+                    android:textOn="Spark Plugs" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ToggleButton
+                    android:id="@+id/airFilter"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Air Filter"
+                    android:textOn="Air Filter" />
+
+                <ToggleButton
+                    android:id="@+id/brakeFluid"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Brake Fluid"
+                    android:textOn="Brake Fluid" />
+
+                <ToggleButton
+                    android:id="@+id/fullService"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Full Service"
+                    android:textOn="Full Service" />
+
+                <ToggleButton
+                    android:id="@+id/fullMOT"
+                    android:layout_width="90dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_btn_toggle"
+                    android:textOff="Passed MOT"
+                    android:textOn="Passed MOT" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/rounded_corners_reverse"
+            android:onClick="addClicked"
+            android:text="Enter Log"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/logMileage"
+            app:layout_constraintRight_toLeftOf="@+id/logCost"
+            app:layout_constraintTop_toBottomOf="@+id/logString"
+            app:layout_constraintVertical_bias="0.888" />
+
+    </LinearLayout>
+
+</RelativeLayout>
