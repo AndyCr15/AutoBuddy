@@ -12,24 +12,6 @@
     android:focusableInTouchMode="true">
 
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="24dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:onClick="addBike"
-        app:elevation="24dp"
-        app:fabSize="mini"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@drawable/plus" />
-
     <Button
         android:id="@+id/button9"
         android:layout_width="150dp"
@@ -140,20 +122,6 @@
                 <!--android:text="tbc"-->
                 <!--android:textAlignment="center">-->
 
-                <TextView
-                    android:id="@+id/clickable_reg_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/rounded_corners_grey_orange"
-                    android:capitalize="characters"
-                    android:clickable="true"
-                    android:hint="Enter Reg"
-                    android:onClick="TextViewClicked"
-                    android:text="Tap to enter"
-                    android:textAlignment="center"
-                    android:textSize="18sp"
-                    tools:text="Enter Reg" />
-
                 <!--<EditText-->
                 <!--android:id="@+id/hidden_reg_view"-->
                 <!--android:layout_width="match_parent"-->
@@ -165,6 +133,20 @@
                 <!--android:textAlignment="center"-->
                 <!--android:textSize="18sp" />-->
                 <!--</ViewSwitcher>-->
+                <TextView
+                    android:id="@+id/clickable_reg_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_corners_grey_orange"
+                    android:capitalize="characters"
+                    android:clickable="true"
+                    android:hint="Enter Reg"
+                    android:onClick="TextViewClicked"
+                    android:text="Tap to enter"
+                    android:textAlignment="center"
+                    android:textSize="18sp"
+                    tools:text="Enter Reg" />
             </FrameLayout>
 
         </LinearLayout>
@@ -500,5 +482,22 @@
             android:textAlignment="center" />
 
     </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:onClick="addBike"
+        app:elevation="12dp"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@drawable/plus" />
 
 </android.support.constraint.ConstraintLayout>

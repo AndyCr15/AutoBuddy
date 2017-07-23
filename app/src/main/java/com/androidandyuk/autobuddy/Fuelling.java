@@ -74,6 +74,7 @@ public class Fuelling extends AppCompatActivity {
     TextView milesDoneTV;
 
     View fuelingDetailsLayout;
+    View fuelSummary;
 
     // used to store what item might be being edited or deleted
     int itemLongPressedPosition = -1;
@@ -97,6 +98,7 @@ public class Fuelling extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         fuelingDetailsLayout = findViewById(R.id.fuelingDetailsLayout);
+        fuelSummary = findViewById(R.id.fuelSummary);
 
         main = (RelativeLayout) findViewById(R.id.main);
 
@@ -379,6 +381,11 @@ public class Fuelling extends AppCompatActivity {
             fuelingDetailsLayout.setVisibility(View.INVISIBLE);
             showingAddFueling = false;
 
+            TextView mpgSummary = (TextView) findViewById(R.id.mpgSummary);
+            double mpgSum = miles / (litres / 4.54609);
+            mpgSummary.setText(oneDecimal.format(mpgSum));
+            fuelSummary.setVisibility(View.VISIBLE);
+
             updateAveMPG();
 
             View thisView = this.getCurrentFocus();
@@ -399,6 +406,10 @@ public class Fuelling extends AppCompatActivity {
         Log.i("Reset", "itemLongPressed");
         itemLongPressed = null;
         itemLongPressedPosition = -1;
+    }
+
+    public void hideSummary(View view){
+        fuelSummary.setVisibility(View.INVISIBLE);
     }
 
     public void updateAveMPG() {
@@ -508,7 +519,7 @@ public class Fuelling extends AppCompatActivity {
 
         for (Bike thisBike : bikes) {
 
-            Log.i("Saving Fuellings", "" + thisBike);
+            Log.i("Saving Fuelings", "" + thisBike);
             try {
                 ArrayList<String> fdates = new ArrayList<>();
                 ArrayList<String> miles = new ArrayList<>();
@@ -598,10 +609,11 @@ public class Fuelling extends AppCompatActivity {
 
             // check if the back button was pressed with the add item view showing
             // if it was, hide this view.  If not, carry on as normal.
-            if (showingAddFueling) {
+            if (showingAddFueling || fuelSummary.getVisibility() == fuelSummary.VISIBLE) {
                 // editing or adding a fueling, so hide the box
                 showingAddFueling = false;
                 fuelingDetailsLayout.setVisibility(View.INVISIBLE);
+                fuelSummary.setVisibility(View.INVISIBLE);
                 Log.i("Reset", "itemLongPressed");
                 itemLongPressed = null;
                 itemLongPressedPosition = -1;

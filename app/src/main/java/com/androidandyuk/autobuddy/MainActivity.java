@@ -204,6 +204,15 @@ public class MainActivity extends AppCompatActivity {
         Favourites.loadFavs();
         Favourites.sortMyList();
 
+        changeHeader();
+
+    }
+
+    public void changeHeader(){
+        TextView selectedVehicle = (TextView)findViewById(R.id.selectedVehicle);
+        if(activeBike>-1){
+            selectedVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
+        }
     }
 
     @Override
@@ -222,7 +231,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         Intent intent;
         switch (item.getItemId()) {
             case 0:
@@ -234,38 +242,47 @@ public class MainActivity extends AppCompatActivity {
             case 1:
                 Log.i("Option", "1");
                 activeBike = 0;
+                changeHeader();
                 return true;
             case 2:
                 Log.i("Option", "2");
                 activeBike = 1;
+                changeHeader();
                 return true;
             case 3:
                 Log.i("Option", "3");
                 activeBike = 2;
+                changeHeader();
                 return true;
             case 4:
                 Log.i("Option", "4");
                 activeBike = 3;
+                changeHeader();
                 return true;
             case 5:
                 Log.i("Option", "5");
                 activeBike = 4;
+                changeHeader();
                 return true;
             case 6:
                 Log.i("Option", "6");
                 activeBike = 5;
+                changeHeader();
                 return true;
             case 7:
                 Log.i("Option", "7");
                 activeBike = 6;
+                changeHeader();
                 return true;
             case 8:
                 Log.i("Option", "8");
                 activeBike = 7;
+                changeHeader();
                 return true;
             case 9:
                 Log.i("Option", "9");
                 activeBike = 8;
+                changeHeader();
                 return true;
         }
 
@@ -367,6 +384,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void goToAnnualReports(View view) {
+        Intent intent = new Intent(getApplicationContext(), AnnualReports.class);
+        startActivity(intent);
+    }
+
     public void goToFueling(View view) {
         if (activeBike > -1) {
             Intent intent = new Intent(getApplicationContext(), Fuelling.class);
@@ -393,6 +415,8 @@ public class MainActivity extends AppCompatActivity {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.bbc.co.uk/weather/"));
         startActivity(browserIntent);
     }
+
+
 
     public class DownloadTask extends AsyncTask<String, Void, String> {
 
@@ -732,6 +756,7 @@ public class MainActivity extends AppCompatActivity {
         String theme = settings.getString("theme", "1");
         Log.i("Theme", theme);
         setAppTheme(Integer.parseInt(theme));
+        changeHeader();
         checkBackground();
     }
 

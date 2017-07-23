@@ -1,5 +1,7 @@
 package com.androidandyuk.autobuddy;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -117,6 +119,20 @@ public class Bike {
         bikeCount++;
     }
 
+    public static double annualMiles(Bike o, int year){
+        int miles = 0;
+        for(fuellingDetails thisFuel : o.fuelings){
+            // check what year this fuel happened in
+            String thisStr[] = thisFuel.date.split("/");
+            int thisYear = Integer.parseInt(thisStr[2]);
+            if(thisYear == year){
+                // in correct year, so add figures on
+                miles += thisFuel.miles;
+            }
+        }
+        Log.i("annualMiles ",year + " : " + miles);
+        return miles;
+    }
 
     @Override
     public String toString() {

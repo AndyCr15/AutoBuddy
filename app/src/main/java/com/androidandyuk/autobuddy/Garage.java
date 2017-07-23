@@ -331,7 +331,7 @@ public class Garage extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            // for some reasone I can't getYear from thisDate, so will just use the current year
+            // for some reason I can't getYear from thisDate, so will just use the current year
             Calendar cal = Calendar.getInstance();
             cal.setTime(thisDate);
             int year = cal.get(Calendar.YEAR);
