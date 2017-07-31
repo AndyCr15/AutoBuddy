@@ -136,7 +136,6 @@ public class CarShows extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            // TODO Auto-generated method stub
             try {
                 Log.i("Car Shows", "doInBackground");
                 String NewsData;

@@ -25,7 +25,7 @@
             android:layout_weight="0"
             android:background="@drawable/rounded_corners_grey_orange"
             android:padding="8dp"
-            android:text="Selected Vehicle"
+            android:text="Go to Garage to add a Vehicle"
             android:textAlignment="center"
             android:textSize="18sp" />
 

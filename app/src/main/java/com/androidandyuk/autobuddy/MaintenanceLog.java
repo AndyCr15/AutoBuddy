@@ -1,7 +1,9 @@
 package com.androidandyuk.autobuddy;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -371,10 +373,26 @@ public class MaintenanceLog extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (Maintenance.itemLongPressed != null) {
-                addLog();
+
+            if (!logString.getText().toString().equals("") || !logCost.getText().toString().equals("") || !logMilage.getText().toString().equals("")) {
+
+                // add warning
+                new AlertDialog.Builder(MaintenanceLog.this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("Discard Current Details?")
+                        .setMessage("Would you like to discard the current information?")
+                        .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("Keep", null)
+                        .show();
+            } else {
+                finish();
             }
-            finish();
+
             return true;
         }
         Maintenance.myAdapter.notifyDataSetChanged();

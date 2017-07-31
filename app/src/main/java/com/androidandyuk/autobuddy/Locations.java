@@ -1,9 +1,7 @@
 package com.androidandyuk.autobuddy;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,7 +16,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
 import static com.androidandyuk.autobuddy.MainActivity.currentForecast;
-import static com.androidandyuk.autobuddy.MainActivity.storageAccepted;
 import static com.androidandyuk.autobuddy.MainActivity.weatherText;
 
 public class Locations extends AppCompatActivity {
@@ -36,38 +33,11 @@ public class Locations extends AppCompatActivity {
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        // requesting permissions to access storage and location
-        String[] perms = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.ACCESS_FINE_LOCATION"};
-        int permsRequestCode = 200;
-        storageAccepted = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(perms, permsRequestCode);
-        }
-
         main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
 
         weatherText = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.weatherView);
         // take weather found in MainActivity
         weatherText.setText("Today's forecast: " + currentForecast);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int permsRequestCode, String[] permissions, int[] grantResults) {
-
-        switch (permsRequestCode) {
-
-            case 200:
-
-                storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-
-                MainActivity.locationAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-
-                Log.i("STRG " + storageAccepted, "LCTN " + MainActivity.locationAccepted);
-
-                break;
-
-        }
-
     }
 
     @Override

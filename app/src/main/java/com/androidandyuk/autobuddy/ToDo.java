@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import static com.androidandyuk.autobuddy.MainActivity.currencySetting;
 import static com.androidandyuk.autobuddy.MainActivity.ed;
 import static com.androidandyuk.autobuddy.MainActivity.precision;
 import static com.androidandyuk.autobuddy.MainActivity.sharedPreferences;
+import static com.androidandyuk.autobuddy.MainActivity.vehiclesDB;
 
 
 public class ToDo extends AppCompatActivity {
@@ -61,8 +63,7 @@ public class ToDo extends AppCompatActivity {
     Spinner prioritySpinner;
 
     View toDoDetailsLayout;
-
-    Boolean addToDoShowing = false;
+    public static View shield;
 
     //used for checking the url is valid
     public static final String URL_REGEX = "^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$";
@@ -76,10 +77,10 @@ public class ToDo extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.androidandyuk.autobuddy.R.layout.activity_to_do);
+        setContentView(R.layout.activity_to_do);
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        mAdView = (AdView) findViewById(com.androidandyuk.autobuddy.R.id.adView);
+        mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
@@ -89,12 +90,13 @@ public class ToDo extends AppCompatActivity {
         sharedPreferences = this.getSharedPreferences("com.androidandyuk.autobuddy", Context.MODE_PRIVATE);
         ed = sharedPreferences.edit();
 
-        toDoDetailsLayout = findViewById(com.androidandyuk.autobuddy.R.id.toDoDetailsLayout);
+        toDoDetailsLayout = findViewById(R.id.toDoDetailsLayout);
+        shield = findViewById(R.id.shield);
 
-        toDoDetails = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.toDoDetails);
-        toDoURL = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.toDoURL);
-        toDoCost = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.toDoCost);
-        prioritySpinner = (Spinner) findViewById(com.androidandyuk.autobuddy.R.id.prioritySpinner);
+        toDoDetails = (EditText) findViewById(R.id.toDoDetails);
+        toDoURL = (EditText) findViewById(R.id.toDoURL);
+        toDoCost = (EditText) findViewById(R.id.toDoCost);
+        prioritySpinner = (Spinner) findViewById(R.id.prioritySpinner);
 
         prioritySpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, ToDoPriority.values()));
         // load the to Do list
@@ -118,7 +120,7 @@ public class ToDo extends AppCompatActivity {
                 toDoCost.setText(Double.toString(bikes.get(activeBike).toDoList.get(position).getPrice()));
                 prioritySpinner.setSelection(bikes.get(activeBike).toDoList.get(position).getPriority().getValue() - 1);
                 toDoDetailsLayout.setVisibility(View.VISIBLE);
-                addToDoShowing = true;
+                shield.setVisibility(View.VISIBLE);
             }
         });
 
@@ -156,7 +158,7 @@ public class ToDo extends AppCompatActivity {
     }
 
     private void initiateList() {
-        toDoList = (ListView) findViewById(com.androidandyuk.autobuddy.R.id.toDoList);
+        toDoList = (ListView) findViewById(R.id.toDoList);
 
         myAdapter = new MyToDoAdapter(bikes.get(activeBike).toDoList);
 
@@ -172,8 +174,17 @@ public class ToDo extends AppCompatActivity {
     public void showToDo() {
         // opens the add fueling dialog
         Log.i("ToDo", "Show To Do layout");
+
+        resetToDo();
+
         toDoDetailsLayout.setVisibility(View.VISIBLE);
-        addToDoShowing = true;
+        shield.setVisibility(View.VISIBLE);
+    }
+
+    public void resetToDo() {
+        toDoDetails.setText(null);
+        toDoURL.setText(null);
+        toDoCost.setText(null);
     }
 
     public void addToDoClicked(View view) {
@@ -219,7 +230,7 @@ public class ToDo extends AppCompatActivity {
             Collections.sort(bikes.get(activeBike).toDoList);
             myAdapter.notifyDataSetChanged();
             toDoDetailsLayout.setVisibility(View.INVISIBLE);
-            addToDoShowing = false;
+            shield.setVisibility(View.INVISIBLE);
 
             // clear previous entries
             toDoDetails.setText(null);
@@ -235,20 +246,46 @@ public class ToDo extends AppCompatActivity {
         itemLongPressedPosition = -1;
     }
 
+    public void shieldClicked(View view){
+        if (!toDoDetails.getText().toString().equals("") || !toDoURL.getText().toString().equals("") || !toDoCost.getText().toString().equals("")) {
+
+            new AlertDialog.Builder(ToDo.this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Discard Current Details?")
+                    .setMessage("Would you like to discard the current information?")
+                    .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // editing or adding a To Do, so hide the box
+                            toDoDetailsLayout.setVisibility(View.INVISIBLE);
+                            shield.setVisibility(View.INVISIBLE);
+                            Log.i("Reset", "itemLongPressed");
+                            itemLongPressed = null;
+                            itemLongPressedPosition = -1;
+                        }
+                    })
+                    .setNegativeButton("Keep", null)
+                    .show();
+        } else {
+            toDoDetailsLayout.setVisibility(View.INVISIBLE);
+            shield.setVisibility(View.INVISIBLE);
+        }
+    }
+
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
-        if(backgroundsWanted){
-            int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
+        main = (RelativeLayout) findViewById(R.id.main);
+        if (backgroundsWanted) {
+            int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             ToDo.main.setBackground(drawablePic);
         } else {
-            ToDo.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            ToDo.main.setBackgroundColor(getResources().getColor(R.color.background));
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(com.androidandyuk.autobuddy.R.menu.bike_choice, menu);
+        getMenuInflater().inflate(R.menu.bike_choice, menu);
 
         super.onCreateOptionsMenu(menu);
 
@@ -350,12 +387,12 @@ public class ToDo extends AppCompatActivity {
             final ToDoDetails s = toDoDataAdapter.get(position);
 
             LayoutInflater mInflater = getLayoutInflater();
-            View myView = mInflater.inflate(com.androidandyuk.autobuddy.R.layout.todo_listview, null);
+            View myView = mInflater.inflate(R.layout.todo_listview, null);
 
-            TextView toDoListURL = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.toDoURL);
+            TextView toDoListURL = (TextView) myView.findViewById(R.id.toDoURL);
             String thisURL = s.url;
-            if (thisURL.length()>80){
-                thisURL = thisURL.substring(0,80);
+            if (thisURL.length() > 80) {
+                thisURL = thisURL.substring(0, 80);
             }
             toDoListURL.setText(thisURL);
             toDoListURL.setOnClickListener(new View.OnClickListener() {
@@ -371,13 +408,13 @@ public class ToDo extends AppCompatActivity {
                 }
             });
 
-            TextView toDoListLog = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.toDoLog);
+            TextView toDoListLog = (TextView) myView.findViewById(R.id.toDoLog);
             toDoListLog.setText(s.log);
 
-            TextView toDoListCost = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.toDoCost);
+            TextView toDoListCost = (TextView) myView.findViewById(R.id.toDoCost);
             String text = currencySetting + precision.format(s.price);
-            if(s.price == 0){
-                text= "";
+            if (s.price == 0) {
+                text = "";
             }
             toDoListCost.setText(text);
 
@@ -389,40 +426,51 @@ public class ToDo extends AppCompatActivity {
 
         for (Bike thisBike : bikes) {
 
-            Log.i("Saving To Dos", "" + thisBike);
-            try {
-                ArrayList<String> tdDetails = new ArrayList<>();
-                ArrayList<String> tdPrices = new ArrayList<>();
-                ArrayList<String> tdUrls = new ArrayList<>();
-                ArrayList<String> tdPriority = new ArrayList<>();
+            Log.i("Saving ToDos DB", "" + thisBike);
+            ArrayList<String> tdDetails = new ArrayList<>();
+            ArrayList<String> tdPrices = new ArrayList<>();
+            ArrayList<String> tdUrls = new ArrayList<>();
+            ArrayList<String> tdPriority = new ArrayList<>();
 
-                for (ToDoDetails thisTD : thisBike.toDoList) {
+            for (ToDoDetails thisTD : thisBike.toDoList) {
 
-                    tdDetails.add(thisTD.log);
-                    tdPrices.add(Double.toString(thisTD.price));
-                    tdUrls.add(thisTD.url);
-                    tdPriority.add(Integer.toString(thisTD.priority.getValue()));
+                tdDetails.add(thisTD.log);
+                tdPrices.add(Double.toString(thisTD.price));
+                tdUrls.add(thisTD.url);
+                tdPriority.add(Integer.toString(thisTD.priority.getValue()));
 
-                }
-
-                Log.i("Saving ToDos", "Size :" + tdDetails.size());
-                ed.putString("tdDetails" + thisBike.bikeId, ObjectSerializer.serialize(tdDetails)).apply();
-                ed.putString("tdPrices" + thisBike.bikeId, ObjectSerializer.serialize(tdPrices)).apply();
-                ed.putString("tdUrls" + thisBike.bikeId, ObjectSerializer.serialize(tdUrls)).apply();
-                ed.putString("tdPriority" + thisBike.bikeId, ObjectSerializer.serialize(tdPriority)).apply();
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.i("Adding ToDos", "Failed attempt");
             }
+
+            Log.i("Saving ToDos DB", "Size :" + tdDetails.size());
+            try {
+                String dbname = "todo" + thisBike.bikeId;
+
+                vehiclesDB.execSQL("CREATE TABLE IF NOT EXISTS '" + dbname + "' (tdDetails VARCHAR, tdPrices VARCHAR, tdUrls VARCHAR, tdPriority VARCHAR)");
+
+                vehiclesDB.delete(dbname, null, null);
+
+                vehiclesDB.execSQL("INSERT INTO '" + dbname + "' (tdDetails, tdPrices, tdUrls, tdPriority) VALUES ('" + ObjectSerializer.serialize(tdDetails) + "' , '" +
+                        ObjectSerializer.serialize(tdPrices) + "' , '" + ObjectSerializer.serialize(tdUrls) + "' , '" +ObjectSerializer.serialize(tdPriority) + "')");
+
+                Log.i("Saving ToDos DB", "Saved");
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+                Log.i("Saving ToDos DB", "Caught Error :" + e);
+
+            }
+
+
         }
     }
 
-    public static void loadToDos() {
+    public static void loadToDosOld() {
 
         for (Bike thisBike : bikes) {
             thisBike.toDoList.clear();
 
-            Log.i("Loading ToDos", "" + thisBike);
+            Log.i("Loading ToDos Old", "" + thisBike);
 
             ArrayList<String> tdDetails = new ArrayList<>();
             ArrayList<String> tdPrices = new ArrayList<>();
@@ -459,6 +507,68 @@ public class ToDo extends AppCompatActivity {
         }
     }
 
+    public static void loadToDos() {
+
+        for (Bike thisBike : bikes) {
+            thisBike.toDoList.clear();
+
+            Log.i("Loading ToDos", "" + thisBike);
+            try {
+                String dbname = "todo" + thisBike.bikeId;
+
+                Cursor c = vehiclesDB.rawQuery("SELECT * FROM " + dbname, null);
+
+                int tdDetailsIndex = c.getColumnIndex("tdDetails");
+                int tdPricesIndex = c.getColumnIndex("tdPrices");
+                int tdUrlsIndex = c.getColumnIndex("tdUrls");
+                int tdPriorityIndex = c.getColumnIndex("tdPriority");
+
+                c.moveToFirst();
+
+                do {
+
+                    ArrayList<String> tdDetails = new ArrayList<>();
+                    ArrayList<String> tdPrices = new ArrayList<>();
+                    ArrayList<String> tdUrls = new ArrayList<>();
+                    ArrayList<String> tdPriority = new ArrayList<>();
+
+                    try {
+
+                        tdDetails = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(tdDetailsIndex));
+                        tdPrices = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(tdPricesIndex));
+                        tdUrls = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(tdUrlsIndex));
+                        tdPriority = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(tdPriorityIndex));
+
+                        Log.i("Fuelings Restored ", "Count :" + tdDetails.size());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.i("Loading Fuel", "Failed attempt");
+                    }
+
+                    Log.i("Retrieved info", "Log count :" + tdDetails.size());
+                    if (tdDetails.size() > 0 && tdPrices.size() > 0 && tdUrls.size() > 0) {
+                        // we've checked there is some info
+                        if (tdDetails.size() == tdPrices.size() && tdPrices.size() == tdUrls.size()) {
+                            // we've checked each item has the same amount of info, nothing is missing
+                            for (int x = 0; x < tdDetails.size(); x++) {
+
+                                ToDoDetails newToDo = new ToDoDetails(tdDetails.get(x), Double.parseDouble(tdPrices.get(x)), tdUrls.get(x), Integer.parseInt(tdPriority.get(x)));
+                                Log.i("Adding", "" + x + "" + newToDo);
+                                thisBike.toDoList.add(newToDo);
+
+                            }
+                        }
+                    }
+                } while (c.moveToNext());
+
+            } catch (Exception e) {
+
+                Log.i("LoadingDB", "Caught Error");
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     public void onBackPressed() {
         // this must be empty as back is being dealt with in onKeyDown
@@ -470,14 +580,34 @@ public class ToDo extends AppCompatActivity {
 
             // check if the back button was pressed with the add item view showing
             // if it was, hide this view.  If not, carry on as normal.
-            if (addToDoShowing) {
-                // editing or adding a To Do, so hide the box
-                addToDoShowing = false;
-                toDoDetailsLayout.setVisibility(View.INVISIBLE);
-                Log.i("Reset", "itemLongPressed");
-                itemLongPressed = null;
-                itemLongPressedPosition = -1;
-                // reset the fuelling text boxes?
+            if (toDoDetailsLayout.isShown()) {
+
+                // make a check, if they're all empty dont ask the alert
+                if (!toDoDetails.getText().toString().equals("") || !toDoURL.getText().toString().equals("") || !toDoCost.getText().toString().equals("")) {
+
+                    new AlertDialog.Builder(ToDo.this)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle("Discard Current Details?")
+                            .setMessage("Would you like to discard the current information?")
+                            .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // editing or adding a To Do, so hide the box
+                                    toDoDetailsLayout.setVisibility(View.INVISIBLE);
+                                    shield.setVisibility(View.INVISIBLE);
+                                    Log.i("Reset", "itemLongPressed");
+                                    itemLongPressed = null;
+                                    itemLongPressedPosition = -1;
+                                }
+                            })
+                            .setNegativeButton("Keep", null)
+                            .show();
+                } else {
+                    toDoDetailsLayout.setVisibility(View.INVISIBLE);
+                    shield.setVisibility(View.INVISIBLE);
+                    return true;
+                }
+
             } else {
                 finish();
                 return true;

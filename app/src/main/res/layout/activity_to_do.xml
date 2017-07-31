@@ -45,6 +45,12 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/shield"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="shieldClicked" />
+
     <LinearLayout
         android:id="@+id/toDoDetailsLayout"
         android:layout_width="match_parent"

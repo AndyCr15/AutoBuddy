@@ -113,7 +113,7 @@ public class Garage extends AppCompatActivity {
 
         if (activeBike > -1) {
             int thisTax = getEnumPos(bikes.get(activeBike).taxDue);
-            Log.i("This Tax", bikes.get(activeBike).taxDue + " " + thisTax);
+            Log.i("onCreate taxDue", bikes.get(activeBike).taxDue + " " + thisTax);
             taxDue.setSelection(thisTax - 1);
         }
 
@@ -226,6 +226,11 @@ public class Garage extends AppCompatActivity {
             Log.i("Active Bike Reg", " " + (bikes.get(activeBike).registration));
 
             myRegView.setText((bikes.get(activeBike).registration));
+
+            Log.i("garageSetup taxDue", bikes.get(activeBike).taxDue);
+            Log.i("position", "" + getEnumPos(bikes.get(activeBike).taxDue));
+
+            taxDue.setSelection(getEnumPos(bikes.get(activeBike).taxDue) - 1);
 
             // show only 2 decimal places.  Precision is declared in MainActivity to 2 decimal places
             String spend = currencySetting + precision.format(calculateMaintSpend(bikes.get(activeBike)));
@@ -378,7 +383,7 @@ public class Garage extends AppCompatActivity {
     }
 
     public void addNewBike(View view) {
-
+changingBikes();
         String make = bikeMake.getText().toString();
         String model = bikeModel.getText().toString();
         String year = bikeYear.getText().toString();
@@ -428,7 +433,7 @@ public class Garage extends AppCompatActivity {
             new AlertDialog.Builder(Garage.this)
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle("Are you sure?")
-                    .setMessage("You're about to remove this bike and all it's data forever...")
+                    .setMessage("You're about to remove this vehicle and all it's data forever...")
                     .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -457,6 +462,10 @@ public class Garage extends AppCompatActivity {
         getDetails.setVisibility(View.VISIBLE);
         final EditText reg = (EditText) findViewById(R.id.getDetailsText);
         reg.setHint(hint);
+        if (!bikes.get(activeBike).registration.equals("unknown")) {
+            reg.setText("");
+            reg.append(bikes.get(activeBike).registration);
+        }
 
         reg.setFocusableInTouchMode(true);
         reg.requestFocus();
@@ -514,7 +523,7 @@ public class Garage extends AppCompatActivity {
     }
 
     public void calcEstMileage() {
-        if(activeBike>-1) {
+        if (activeBike > -1) {
             loadLogs();
             loadFuels();
             Log.i("Garage", "calcEstMileage");
@@ -585,26 +594,17 @@ public class Garage extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        // this must be empty as back is being dealt with in onKeyDown
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            //assign the views that could be showing, to check if they are showing when back is pressed
-            View addingBikeInfo = findViewById(R.id.addingBikeInfo);
-            View getDetails = findViewById(R.id.getDetails);
-            if (addingBikeInfo.isShown() || getDetails.isShown()) {
-                addingBikeInfo.setVisibility(View.INVISIBLE);
-                getDetails.setVisibility(View.INVISIBLE);
-            } else {
-                finish();
-                return true;
-            }
+    public void changingBikes() {
+        taxDue = (Spinner) findViewById(R.id.taxSpinner);
+        String thisTaxDue = taxDue.getSelectedItem().toString();
+        Log.i("Changing Bikes taxDue", thisTaxDue);
+        bikeNotes = (EditText) findViewById(R.id.bikeNotes);
+        // check there's actually a bike before saving the notes
+        if (bikeNotes != null && bikes.size() > 0) {
+            bikes.get(activeBike).notes = bikeNotes.getText().toString();
+            bikes.get(activeBike).taxDue = thisTaxDue;
         }
-        return super.onKeyDown(keyCode, event);
+        saveBikes();
     }
 
     @Override
@@ -623,7 +623,7 @@ public class Garage extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
+        changingBikes();
         if (activeBike > -1) {
             // save any changes in Bike notes
             bikeNotes = (EditText) findViewById(R.id.bikeNotes);
@@ -687,31 +687,52 @@ public class Garage extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        taxDue = (Spinner) findViewById(R.id.taxSpinner);
-        String thisTaxDue = taxDue.getSelectedItem().toString();
-        Log.i("Tax is due", thisTaxDue);
-        bikeNotes = (EditText) findViewById(R.id.bikeNotes);
-        // check there's actually a bike before saving the notes
-        if (bikeNotes != null && bikes.size() > 0) {
-            bikes.get(activeBike).notes = bikeNotes.getText().toString();
-            bikes.get(activeBike).taxDue = thisTaxDue;
-        }
+    public void onBackPressed() {
+        // this must be empty as back is being dealt with in onKeyDown
+    }
 
-//        myRegView = (EditText) findViewById(R.id.hidden_reg_view);
-//        // check there's actually a bike before saving the reg
-//        if (!myRegView.getText().toString().equals("") && bikes.size() > 0) {
-//            bikes.get(activeBike).registration = myRegView.getText().toString();
-//            Log.i("Setting Reg", " to " + myRegView.getText().toString());
-//        }
-        saveBikes();
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            //assign the views that could be showing, to check if they are showing when back is pressed
+            final View addingBikeInfo = findViewById(R.id.addingBikeInfo);
+            final View getDetails = findViewById(R.id.getDetails);
+            if (addingBikeInfo.isShown() || getDetails.isShown()) {
+
+                // add warning
+                new AlertDialog.Builder(Garage.this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("Discard Current Details?")
+                        .setMessage("Would you like to discard the current information?")
+                        .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                addingBikeInfo.setVisibility(View.INVISIBLE);
+                                getDetails.setVisibility(View.INVISIBLE);
+                            }
+                        })
+                        .setNegativeButton("Keep", null)
+                        .show();
+
+
+            } else {
+                finish();
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onPause() {
+        changingBikes();
+        super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i("Garage","onResume");
+        Log.i("Garage", "onResume");
         garageSetup();
         checkBackground();
     }

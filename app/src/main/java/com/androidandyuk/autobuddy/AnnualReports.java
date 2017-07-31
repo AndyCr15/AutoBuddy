@@ -323,8 +323,7 @@ public class AnnualReports extends AppCompatActivity {
 
             if (listType == 0) {
                 TextView litresTV = (TextView) myView.findViewById(R.id.litresTV);
-                String litres = Double.toString(s.afLitres);
-                litresTV.setText("Litres : " + litres);
+                litresTV.setText("Litres : " + oneDecimal.format(s.afLitres));
 
                 TextView mpgTV = (TextView) myView.findViewById(R.id.mpgTV);
                 Double mpg = s.afMiles / (s.afLitres / 4.54609);

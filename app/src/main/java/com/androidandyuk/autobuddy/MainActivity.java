@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
 import android.location.Location;
@@ -17,6 +19,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
@@ -49,7 +52,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import static com.androidandyuk.autobuddy.CarShows.loadShows;
+import static com.androidandyuk.autobuddy.Fuelling.loadFuels;
+import static com.androidandyuk.autobuddy.Fuelling.loadFuelsOld;
+import static com.androidandyuk.autobuddy.Fuelling.saveFuels;
+import static com.androidandyuk.autobuddy.Maintenance.loadLogs;
+import static com.androidandyuk.autobuddy.Maintenance.loadLogsOld;
+import static com.androidandyuk.autobuddy.Maintenance.saveLogs;
 import static com.androidandyuk.autobuddy.ToDo.loadToDos;
+import static com.androidandyuk.autobuddy.ToDo.loadToDosOld;
 import static com.androidandyuk.autobuddy.ToDo.saveToDos;
 
 public class MainActivity extends AppCompatActivity {
@@ -94,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean incBikeEvents;
     public static boolean backgroundsWanted;
 
+    public static SQLiteDatabase vehiclesDB;
 
     public static String userLocationForWeather;
 
@@ -115,26 +127,47 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = this.getSharedPreferences("com.androidandyuk.autobuddy", Context.MODE_PRIVATE);
         ed = sharedPreferences.edit();
 
+
+        vehiclesDB = this.openOrCreateDatabase("Vehicles", MODE_PRIVATE, null);
+
+        vehiclesDB.execSQL("CREATE TABLE IF NOT EXISTS vehicles (make VARCHAR, model VARCHAR, reg VARCHAR, bikeId VARCHAR, VIN VARCHAR, serviceDue VARCHAR, MOTdue VARCHAR" +
+                ", lastKnownService VARCHAR, lastKnownMOT VARCHAR, yearOfMan VARCHAR, notes VARCHAR, estMileage VARCHAR, MOTwarned VARCHAR, serviceWarned VARCHAR, taxDue VARCHAR)");
+
         loadSettings();
+
+        // requesting permissions to access storage and location
+        Log.i("storageAccepted " + storageAccepted, "locationAccepted " + locationAccepted);
+        if (!storageAccepted || !locationAccepted) {
+            String[] perms = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.ACCESS_FINE_LOCATION"};
+            int permsRequestCode = 200;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(perms, permsRequestCode);
+            }
+        }
 
         checkUpdate();
 
+        Log.i("updateNeeded", "" + updateNeeded);
         if (updateNeeded) {
-            oldLoadBikes();
-            Fuelling.loadFuels();
-            Maintenance.loadLogs();
-            loadToDos();
-            CarShows.loadShows();
-            getApplicationContext().getSharedPreferences("CREDENTIALS", 0).edit().clear().commit();
-//            ed.putBoolean("updateNeeded1", false).apply();
-            saveBikes();
-            Fuelling.saveFuels();
-            Maintenance.saveLogs();
+            loadBikesOld();
+            loadFuelsOld();
+            loadLogsOld();
+            loadToDosOld();
+            saveFuels();
+            saveLogs();
             saveToDos();
+            getApplicationContext().getSharedPreferences("CREDENTIALS", 0).edit().clear().commit();
+            updateNeeded = false;
+            ed.putBoolean("updateNeeded3", false).apply();
+            saveBikes();
+            loadShows();
+            activeBike = 0;
         } else {
             loadBikes();
-            Fuelling.loadFuels();
-            Maintenance.loadLogs();
+            loadFuels();
+            loadLogs();
+            loadToDos();
+            loadShows();
         }
         checkMOTwarning();
         checkServiceWarning();
@@ -180,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, locationUpdatesTime, 1000, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10800000, 1000, locationListener);
 
             Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
@@ -208,9 +241,29 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void changeHeader(){
-        TextView selectedVehicle = (TextView)findViewById(R.id.selectedVehicle);
-        if(activeBike>-1){
+    @Override
+    public void onRequestPermissionsResult(int permsRequestCode, String[] permissions, int[] grantResults) {
+
+        switch (permsRequestCode) {
+
+            case 200:
+
+                storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+                locationAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                Log.i("PERMS storageAccepted " + storageAccepted, "locationAccepted " + locationAccepted);
+                ed.putBoolean("locationAccepted", locationAccepted).apply();
+                ed.putBoolean("storageAccepted", storageAccepted).apply();
+
+                break;
+
+        }
+
+    }
+
+    public void changeHeader() {
+        TextView selectedVehicle = (TextView) findViewById(R.id.selectedVehicle);
+        if (activeBike > -1) {
             selectedVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
         }
     }
@@ -295,14 +348,14 @@ public class MainActivity extends AppCompatActivity {
         // get the date this bikes MOT is due
         Calendar dueDate = new GregorianCalendar();
         try {
-                dueDate.setTime(sdf.parse(due));
+            dueDate.setTime(sdf.parse(due));
         } catch (ParseException e) {
             e.printStackTrace();
             Log.i("MOT Check", "Date conversion failed");
         }
 
-        Log.i("dueDate","" + dueDate);
-        Log.i("testDate","" + testDate);
+        Log.i("dueDate", "" + dueDate);
+        Log.i("testDate", "" + testDate);
         if (dueDate.before(testDate)) {
             return true;
         }
@@ -326,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
                             .setContentText("The MOT for " + thisBike + " is due within " + warningDays + " days")
                             .setContentIntent(pendingIntent)
 //                            .addAction(android.R.drawable.btn_default, "Open App", pendingIntent)
-                            .setSmallIcon(R.drawable.icon)
+                            .setSmallIcon(R.drawable.ic_stat_name)
                             .build();
 
                     NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -358,7 +411,7 @@ public class MainActivity extends AppCompatActivity {
                             .setContentText("The Service for " + thisBike + " is due within " + warningDays + " days")
                             .setContentIntent(pendingIntent)
 //                            .addAction(android.R.drawable.btn_default, "Open App", pendingIntent)
-                            .setSmallIcon(android.R.drawable.alert_light_frame)
+                            .setSmallIcon(R.drawable.ic_stat_name)
                             .build();
 
                     NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -415,7 +468,6 @@ public class MainActivity extends AppCompatActivity {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.bbc.co.uk/weather/"));
         startActivity(browserIntent);
     }
-
 
 
     public class DownloadTask extends AsyncTask<String, Void, String> {
@@ -495,13 +547,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void checkUpdate() {
-        updateNeeded = sharedPreferences.getBoolean("updateNeeded1", true);
+        updateNeeded = sharedPreferences.getBoolean("updateNeeded3", true);
+        Log.i("updateNeeded3", " " + updateNeeded);
     }
 
     public void checkBackground() {
         main = (RelativeLayout) findViewById(R.id.main);
-        if(backgroundsWanted){
-            int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
+        if (backgroundsWanted) {
+            int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             MainActivity.main.setBackground(drawablePic);
         } else {
@@ -509,11 +562,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static void saveBikes() {
+    public static void saveBikesOld() {
         Log.i("Main Activity", "New Saving Bikes");
         ed.putInt("bikeCount", Bike.bikeCount).apply();
         ed.putInt("bikesSize", bikes.size()).apply();
-        ed.putBoolean("updateNeeded1", updateNeeded).apply();
 
         ArrayList<String> make = new ArrayList<>();
         ArrayList<String> model = new ArrayList<>();
@@ -573,10 +625,71 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static void loadBikes() {
-        Log.i("Main Activity", "New Bikes Loading");
+    public static void saveBikes() {
+
+        Log.i("Main Activity", "saveBikesDB");
+        ed.putInt("bikeCount", Bike.bikeCount).apply();
+        ed.putInt("bikesSize", bikes.size()).apply();
+
+        ArrayList<String> make = new ArrayList<>();
+        ArrayList<String> model = new ArrayList<>();
+        ArrayList<String> reg = new ArrayList<>();
+        ArrayList<String> bikeId = new ArrayList<>();
+        ArrayList<String> VIN = new ArrayList<>();
+        ArrayList<String> serviceDue = new ArrayList<>();
+        ArrayList<String> MOTdue = new ArrayList<>();
+        ArrayList<String> lastKnownService = new ArrayList<>();
+        ArrayList<String> lastKnownMOT = new ArrayList<>();
+        ArrayList<String> yearOfMan = new ArrayList<>();
+        ArrayList<String> notes = new ArrayList<>();
+        ArrayList<String> estMileage = new ArrayList<>();
+        ArrayList<String> MOTwarned = new ArrayList<>();
+        ArrayList<String> serviceWarned = new ArrayList<>();
+        ArrayList<String> taxDue = new ArrayList<>();
+
+        for (Bike thisBike : bikes) {
+            Log.i("Saving BikesDB", "" + thisBike);
+
+            make.add(thisBike.make);
+            model.add(thisBike.model);
+            reg.add(thisBike.registration);
+            bikeId.add(Integer.toString(thisBike.bikeId));
+            VIN.add(thisBike.VIN);
+            serviceDue.add(thisBike.serviceDue);
+            MOTdue.add(thisBike.MOTdue);
+            lastKnownService.add(thisBike.lastKnownService);
+            lastKnownMOT.add(thisBike.lastKnownMOT);
+            yearOfMan.add(thisBike.yearOfMan);
+            notes.add(thisBike.notes);
+            estMileage.add(Double.toString(thisBike.estMileage));
+            MOTwarned.add(String.valueOf(thisBike.MOTwarned));
+            serviceWarned.add(String.valueOf(thisBike.serviceWarned));
+            taxDue.add(thisBike.taxDue);
+        }
+        Log.i("saveBikesDB", "Size :" + bikes.size());
+
+        try {
+
+
+            vehiclesDB.delete("vehicles", null, null);
+
+            vehiclesDB.execSQL("INSERT INTO vehicles (make, model, reg, bikeId, VIN, serviceDue, MOTdue, lastKnownService, lastKnownMOT, yearOfMan, notes, estMileage, MOTwarned, serviceWarned, taxDue) VALUES ('" +
+                    ObjectSerializer.serialize(make) + "' , '" + ObjectSerializer.serialize(model) + "' , '" + ObjectSerializer.serialize(reg) + "' , '" +
+                    ObjectSerializer.serialize(bikeId) + "' , '" + ObjectSerializer.serialize(VIN) + "' , '" + ObjectSerializer.serialize(serviceDue) + "' , '" + ObjectSerializer.serialize(MOTdue) + "' , '" +
+                    ObjectSerializer.serialize(lastKnownService) + "' , '" + ObjectSerializer.serialize(lastKnownMOT) + "' , '" + ObjectSerializer.serialize(yearOfMan) + "' , '" + ObjectSerializer.serialize(notes) + "' , '" +
+                    ObjectSerializer.serialize(estMileage) + "' , '" + ObjectSerializer.serialize(MOTwarned) + "' , '" + ObjectSerializer.serialize(serviceWarned) + "' , '" + ObjectSerializer.serialize(taxDue) + "')");
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+    }
+
+    public static void loadBikesOld() {
+        Log.i("Main Activity", "loadBikes Old");
         int bikesSize = sharedPreferences.getInt("bikesSize", 0);
-        updateNeeded = sharedPreferences.getBoolean("updateNeeded1", true);
 
         Log.i("Bikes Size", "" + bikesSize);
         bikes.clear();
@@ -641,104 +754,136 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         Bike.bikeCount = sharedPreferences.getInt("bikeCount", 0);
-        Maintenance.loadLogs();
-        Fuelling.loadFuels();
+        loadLogs();
+        loadFuels();
     }
 
-    public static void loadSettings(){
+    public static void loadBikes() {
+
+        Log.i("Main Activity", "New Bikes Loading");
+        int bikesSize = sharedPreferences.getInt("bikesSize", 0);
+
+        Log.i("Bikes Size", "" + bikesSize);
+        bikes.clear();
+
+        try {
+
+            Cursor c = vehiclesDB.rawQuery("SELECT * FROM vehicles", null);
+
+            int makeIndex = c.getColumnIndex("make");
+            int modelIndex = c.getColumnIndex("model");
+            int regIndex = c.getColumnIndex("reg");
+            int bikeIdIndex = c.getColumnIndex("bikeId");
+            int VINIndex = c.getColumnIndex("VIN");
+            int serviceDueIndex = c.getColumnIndex("serviceDue");
+            int MOTdueIndex = c.getColumnIndex("MOTdue");
+            int lastKnownServiceIndex = c.getColumnIndex("lastKnownService");
+            int lastKnownMOTIndex = c.getColumnIndex("lastKnownMOT");
+            int yearOfManIndex = c.getColumnIndex("yearOfMan");
+            int notesIndex = c.getColumnIndex("notes");
+            int estMileageIndex = c.getColumnIndex("estMileage");
+            int MOTwarnedIndex = c.getColumnIndex("MOTwarned");
+            int serviceWarnedIndex = c.getColumnIndex("serviceWarned");
+            int taxDueIndex = c.getColumnIndex("taxDue");
+
+            c.moveToFirst();
+
+            do {
+
+                ArrayList<String> make = new ArrayList<>();
+                ArrayList<String> model = new ArrayList<>();
+                ArrayList<String> reg = new ArrayList<>();
+                ArrayList<String> bikeId = new ArrayList<>();
+                ArrayList<String> VIN = new ArrayList<>();
+                ArrayList<String> serviceDue = new ArrayList<>();
+                ArrayList<String> MOTdue = new ArrayList<>();
+                ArrayList<String> lastKnownService = new ArrayList<>();
+                ArrayList<String> lastKnownMOT = new ArrayList<>();
+                ArrayList<String> yearOfMan = new ArrayList<>();
+                ArrayList<String> notes = new ArrayList<>();
+                ArrayList<String> estMileage = new ArrayList<>();
+                ArrayList<String> MOTwarned = new ArrayList<>();
+                ArrayList<String> serviceWarned = new ArrayList<>();
+                ArrayList<String> taxDue = new ArrayList<>();
+
+                try {
+
+                    make = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(makeIndex));
+                    model = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(modelIndex));
+                    reg = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(regIndex));
+                    bikeId = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(bikeIdIndex));
+                    VIN = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(VINIndex));
+                    serviceDue = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(serviceDueIndex));
+                    MOTdue = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(MOTdueIndex));
+                    lastKnownService = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(lastKnownServiceIndex));
+                    lastKnownMOT = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(lastKnownMOTIndex));
+                    yearOfMan = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(yearOfManIndex));
+                    notes = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(notesIndex));
+                    estMileage = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(estMileageIndex));
+                    MOTwarned = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(MOTwarnedIndex));
+                    serviceWarned = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(serviceWarnedIndex));
+                    taxDue = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(taxDueIndex));
+
+                    Log.i("Bikes Restored ", "Count :" + make.size());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("Loading Bikes", "Failed attempt");
+                }
+
+                Log.i("Retrieved info", "Log count :" + make.size());
+                if (make.size() > 0 && model.size() > 0 && bikeId.size() > 0) {
+                    // we've checked there is some info
+                    if (make.size() == model.size() && model.size() == bikeId.size()) {
+                        // we've checked each item has the same amount of info, nothing is missing
+                        for (int x = 0; x < make.size(); x++) {
+                            int thisId = Integer.parseInt(bikeId.get(x));
+                            double thisEstMileage = Double.parseDouble(estMileage.get(x));
+                            boolean thisMOTwarned = Boolean.parseBoolean(MOTwarned.get(x));
+                            boolean thisServiceWarned = Boolean.parseBoolean(serviceWarned.get(x));
+                            Bike newBike = new Bike(thisId, make.get(x), model.get(x), reg.get(x), VIN.get(x), serviceDue.get(x), MOTdue.get(x), lastKnownService.get(x), lastKnownMOT.get(x),
+                                    yearOfMan.get(x), notes.get(x), thisEstMileage, thisMOTwarned, thisServiceWarned, taxDue.get(x));
+                            Log.i("Adding", " " + x + " " + newBike);
+                            bikes.add(newBike);
+                        }
+                    }
+                }
+            } while (c.moveToNext());
+
+        } catch (Exception e) {
+
+            Log.i("LoadingDB", "Caught Error");
+            e.printStackTrace();
+
+        }
+        Bike.bikeCount = sharedPreferences.getInt("bikeCount", 0);
+        loadLogs();
+        loadFuels();
+    }
+
+    public static void loadSettings() {
         lastHowManyFuels = sharedPreferences.getInt("lastHowManyFuels", 10);
         locationUpdatesTime = sharedPreferences.getInt("locationUpdatesTime", 1200000);
         incCarEvents = sharedPreferences.getBoolean("incCarEvents", true);
         incBikeEvents = sharedPreferences.getBoolean("incBikeEvents", true);
         backgroundsWanted = sharedPreferences.getBoolean("backgroundsWanted", true);
+        locationAccepted = sharedPreferences.getBoolean("locationAccepted", false);
+        storageAccepted = sharedPreferences.getBoolean("storageAccepted", false);
         currencySetting = sharedPreferences.getString("currencySetting", "£");
         milesSetting = sharedPreferences.getString("milesSetting", "Miles");
+        Log.i("LOAD storageAccepted " + storageAccepted, "locationAccepted " + locationAccepted);
     }
 
-    public static void saveSettings(){
+    public static void saveSettings() {
         ed.putInt("lastHowManyFuels", lastHowManyFuels).apply();
         ed.putInt("locationUpdatesTime", locationUpdatesTime).apply();
         ed.putBoolean("incCarEvents", incCarEvents).apply();
         ed.putBoolean("incBikeEvents", incBikeEvents).apply();
         ed.putBoolean("backgroundsWanted", backgroundsWanted).apply();
+        ed.putBoolean("locationAccepted", locationAccepted).apply();
+        ed.putBoolean("storageAccepted", storageAccepted).apply();
         ed.putString("currencySetting", currencySetting).apply();
         ed.putString("milesSetting", milesSetting).apply();
-            }
-
-    public static void oldLoadBikes() {
-        Log.i("Main Activity", "Old Bikes Loading");
-        int bikesSize = sharedPreferences.getInt("bikesSize", 0);
-
-        updateNeeded = false;
-
-        Log.i("Bikes Size", "" + bikesSize);
-        bikes.clear();
-
-        ArrayList<String> make = new ArrayList<>();
-        ArrayList<String> model = new ArrayList<>();
-        ArrayList<String> reg = new ArrayList<>();
-        ArrayList<String> bikeId = new ArrayList<>();
-        ArrayList<String> VIN = new ArrayList<>();
-        ArrayList<String> serviceDue = new ArrayList<>();
-        ArrayList<String> MOTdue = new ArrayList<>();
-        ArrayList<String> lastKnownService = new ArrayList<>();
-        ArrayList<String> lastKnownMOT = new ArrayList<>();
-        ArrayList<String> yearOfMan = new ArrayList<>();
-        ArrayList<String> notes = new ArrayList<>();
-        ArrayList<String> estMileage = new ArrayList<>();
-        ArrayList<String> MOTwarned = new ArrayList<>();
-        ArrayList<String> serviceWarned = new ArrayList<>();
-
-        for (int i = 0; i < bikesSize; i++) {
-
-            try {
-
-                make = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("make" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                model = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("model" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                reg = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("reg" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                bikeId = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("bikeId" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                VIN = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("VIN" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                serviceDue = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("serviceDue" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                MOTdue = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("MOTdue" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                lastKnownService = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("lastKnownService" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                lastKnownMOT = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("lastKnownMOT" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                yearOfMan = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("yearOfMan" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                notes = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("notes" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                estMileage = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("estMileage" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                MOTwarned = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("MOTwarned" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-                serviceWarned = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("serviceWarned" + i, ObjectSerializer.serialize(new ArrayList<String>())));
-
-                Log.i("Bikes Restored ", "Count :" + make.size());
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.i("Loading Bikes", "Failed attempt");
-            }
-
-            Log.i("Retrieved info", "Log count :" + make.size());
-            if (make.size() > 0 && model.size() > 0 && bikeId.size() > 0) {
-                // we've checked there is some info
-                if (make.size() == model.size() && model.size() == bikeId.size()) {
-                    // we've checked each item has the same amount of info, nothing is missing
-                    for (int x = 0; x < make.size(); x++) {
-                        Log.i("Retrieving", "Log " + x);
-                        int thisId = Integer.parseInt(bikeId.get(x));
-                        Log.i("Est Mileage", estMileage.get(x));
-                        double thisEstMileage = Double.parseDouble(estMileage.get(x));
-                        boolean thisMOTwarned = Boolean.parseBoolean(MOTwarned.get(x));
-                        boolean thisServiceWarned = Boolean.parseBoolean(serviceWarned.get(x));
-                        Bike newBike = new Bike(thisId, make.get(x), model.get(x), reg.get(x), VIN.get(x), serviceDue.get(x), MOTdue.get(x), lastKnownService.get(x), lastKnownMOT.get(x),
-                                yearOfMan.get(x), notes.get(x), thisEstMileage, thisMOTwarned, thisServiceWarned, "JAN");
-                        Log.i("Adding", "" + x + " " + newBike);
-                        bikes.add(newBike);
-                    }
-
-                }
-            }
-            Bike.bikeCount = sharedPreferences.getInt("bikeCount", 0);
-            Maintenance.loadLogs();
-            Fuelling.loadFuels();
-        }
-        ed.putInt("bikesSize", 0);
+        Log.i("SAVE storageAccepted " + storageAccepted, "locationAccepted " + locationAccepted);
     }
 
     @Override
@@ -751,6 +896,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         invalidateOptionsMenu();
         super.onResume();
+        loadSettings();
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         String theme = settings.getString("theme", "1");
@@ -765,6 +911,7 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         Log.i("Logs Activity", "On Pause");
         saveBikes();
+        saveSettings();
         BackupManager bm = new BackupManager(this);
         bm.dataChanged();
     }

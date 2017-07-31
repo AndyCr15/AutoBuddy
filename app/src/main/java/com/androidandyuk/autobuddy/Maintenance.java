@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -45,6 +46,7 @@ import static com.androidandyuk.autobuddy.MainActivity.oneDecimal;
 import static com.androidandyuk.autobuddy.MainActivity.precision;
 import static com.androidandyuk.autobuddy.MainActivity.sdf;
 import static com.androidandyuk.autobuddy.MainActivity.sharedPreferences;
+import static com.androidandyuk.autobuddy.MainActivity.vehiclesDB;
 
 public class Maintenance extends AppCompatActivity {
 
@@ -346,7 +348,7 @@ public class Maintenance extends AppCompatActivity {
         }
     }
 
-    public static void saveLogs() {
+    public static void saveLogsOld() {
 
         for (Bike thisBike : bikes) {
 
@@ -416,12 +418,81 @@ public class Maintenance extends AppCompatActivity {
         }
     }
 
-    public static void loadLogs() {
+    public static void saveLogs() {
+
+        for (Bike thisBike : bikes) {
+
+            Log.i("Saving Logs", "" + thisBike);
+
+            ArrayList<String> dates = new ArrayList<>();
+            ArrayList<String> logs = new ArrayList<>();
+            ArrayList<String> costs = new ArrayList<>();
+            ArrayList<String> mileage = new ArrayList<>();
+            ArrayList<String> wasService = new ArrayList<>();
+            ArrayList<String> wasMOT = new ArrayList<>();
+            ArrayList<String> brakePads = new ArrayList<>();
+            ArrayList<String> brakeDiscs = new ArrayList<>();
+            ArrayList<String> frontTyre = new ArrayList<>();
+            ArrayList<String> rearTyre = new ArrayList<>();
+            ArrayList<String> oilChange = new ArrayList<>();
+            ArrayList<String> newBattery = new ArrayList<>();
+            ArrayList<String> coolantChange = new ArrayList<>();
+            ArrayList<String> sparkPlugs = new ArrayList<>();
+            ArrayList<String> airFilter = new ArrayList<>();
+            ArrayList<String> brakeFluid = new ArrayList<>();
+
+            for (maintenanceLogDetails thisLog : thisBike.maintenanceLogs) {
+
+                dates.add(thisLog.date);
+                logs.add(thisLog.log);
+                costs.add(Double.toString(thisLog.price));
+                mileage.add(Double.toString(thisLog.mileage));
+                wasService.add(String.valueOf(thisLog.wasService));
+                wasMOT.add(String.valueOf(thisLog.wasMOT));
+                brakePads.add(String.valueOf(thisLog.brakePads));
+                brakeDiscs.add(String.valueOf(thisLog.brakeDiscs));
+                frontTyre.add(String.valueOf(thisLog.frontTyre));
+                rearTyre.add(String.valueOf(thisLog.rearTyre));
+                oilChange.add(String.valueOf(thisLog.oilChange));
+                newBattery.add(String.valueOf(thisLog.newBattery));
+                coolantChange.add(String.valueOf(thisLog.coolantChange));
+                sparkPlugs.add(String.valueOf(thisLog.sparkPlugs));
+                airFilter.add(String.valueOf(thisLog.airFilter));
+                brakeFluid.add(String.valueOf(thisLog.brakeFluid));
+
+            }
+            Log.i("saveLogsDB", "Size :" + dates.size());
+
+            try {
+                String dbname = "logs" + thisBike.bikeId;
+
+                vehiclesDB.execSQL("CREATE TABLE IF NOT EXISTS '" + dbname + "' (dates VARCHAR, logs VARCHAR, costs VARCHAR, mileage VARCHAR, wasService VARCHAR, wasMOT VARCHAR, brakePads VARCHAR" +
+                        ", brakeDiscs VARCHAR, frontTyre VARCHAR, rearTyre VARCHAR, oilChange VARCHAR, newBattery VARCHAR, coolantChange VARCHAR, sparkPlugs VARCHAR, airFilter VARCHAR, brakeFluid VARCHAR)");
+
+                vehiclesDB.delete(dbname, null, null);
+
+                vehiclesDB.execSQL("INSERT INTO '" + dbname + "' (dates, logs, costs, mileage, wasService, wasMOT, brakePads" +
+                        ", brakeDiscs, frontTyre, rearTyre, oilChange, newBattery, coolantChange, sparkPlugs, airFilter, brakeFluid) VALUES ('" +
+                        ObjectSerializer.serialize(dates) + "' , '" + ObjectSerializer.serialize(logs) + "' , '" + ObjectSerializer.serialize(costs) + "' , '" + 
+                        ObjectSerializer.serialize(mileage) + "' , '" + ObjectSerializer.serialize(wasService) + "' , '" + ObjectSerializer.serialize(wasMOT) + "' , '" + 
+                        ObjectSerializer.serialize(brakePads) + "' , '" +ObjectSerializer.serialize(brakeDiscs) + "' , '" + ObjectSerializer.serialize(frontTyre) + "' , '" + 
+                        ObjectSerializer.serialize(rearTyre) + "' , '" + ObjectSerializer.serialize(oilChange) + "' , '" +ObjectSerializer.serialize(newBattery) + "' , '" + 
+                        ObjectSerializer.serialize(coolantChange) + "' , '" + ObjectSerializer.serialize(sparkPlugs) + "' , '" +ObjectSerializer.serialize(airFilter) + "' , '" + 
+                        ObjectSerializer.serialize(brakeFluid) + "')");
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void loadLogsOld() {
 
         for (Bike thisBike : bikes) {
             thisBike.maintenanceLogs.clear();
 
-            Log.i("LoadingMaintLogs", "" + thisBike);
+            Log.i("LoadingMaintLogsOld", "" + thisBike);
 
             ArrayList<String> dates = new ArrayList<>();
             ArrayList<String> logs = new ArrayList<>();
@@ -502,6 +573,123 @@ public class Maintenance extends AppCompatActivity {
         }
     }
 
+    public static void loadLogs() {
+
+        for (Bike thisBike : bikes) {
+            thisBike.maintenanceLogs.clear();
+            try {
+                String dbname = "logs" + thisBike.bikeId;
+
+                Cursor c = vehiclesDB.rawQuery("SELECT * FROM " + dbname, null);
+
+                int datesIndex = c.getColumnIndex("dates");
+                int logsIndex = c.getColumnIndex("logs");
+                int costsIndex = c.getColumnIndex("costs");
+                int mileageIndex = c.getColumnIndex("mileage");
+                int wasServiceIndex = c.getColumnIndex("wasService");
+                int wasMOTIndex = c.getColumnIndex("wasMOT");
+                int brakePadsIndex = c.getColumnIndex("brakePads");
+                int brakeDiscsIndex = c.getColumnIndex("brakeDiscs");
+                int frontTyreIndex = c.getColumnIndex("frontTyre");
+                int rearTyreIndex = c.getColumnIndex("rearTyre");
+                int oilChangeIndex = c.getColumnIndex("oilChange");
+                int newBatteryIndex = c.getColumnIndex("newBattery");
+                int coolantChangeIndex = c.getColumnIndex("coolantChange");
+                int sparkPlugsIndex = c.getColumnIndex("sparkPlugs");
+                int airFilterIndex = c.getColumnIndex("airFilter");
+                int brakeFluidIndex = c.getColumnIndex("brakeFluid");
+
+                c.moveToFirst();
+
+                do {
+
+                    ArrayList<String> dates = new ArrayList<>();
+                    ArrayList<String> logs = new ArrayList<>();
+                    ArrayList<String> costs = new ArrayList<>();
+                    ArrayList<String> mileage = new ArrayList<>();
+                    ArrayList<String> wasService = new ArrayList<>();
+                    ArrayList<String> wasMOT = new ArrayList<>();
+                    ArrayList<String> brakePads = new ArrayList<>();
+                    ArrayList<String> brakeDiscs = new ArrayList<>();
+                    ArrayList<String> frontTyre = new ArrayList<>();
+                    ArrayList<String> rearTyre = new ArrayList<>();
+                    ArrayList<String> oilChange = new ArrayList<>();
+                    ArrayList<String> newBattery = new ArrayList<>();
+                    ArrayList<String> coolantChange = new ArrayList<>();
+                    ArrayList<String> sparkPlugs = new ArrayList<>();
+                    ArrayList<String> airFilter = new ArrayList<>();
+                    ArrayList<String> brakeFluid = new ArrayList<>();
+
+                    try {
+
+                        dates = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(datesIndex));
+                        logs = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(logsIndex));
+                        costs = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(costsIndex));
+                        mileage = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(mileageIndex));
+                        wasService = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(wasServiceIndex));
+                        wasMOT = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(wasMOTIndex));
+                        brakePads = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(brakePadsIndex));
+                        brakeDiscs = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(brakeDiscsIndex));
+                        frontTyre = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(frontTyreIndex));
+                        rearTyre = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(rearTyreIndex));
+                        oilChange = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(oilChangeIndex));
+                        newBattery = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(newBatteryIndex));
+                        coolantChange = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(coolantChangeIndex));
+                        sparkPlugs = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(sparkPlugsIndex));
+                        airFilter = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(airFilterIndex));
+                        brakeFluid = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(brakeFluidIndex));
+
+                        Log.i("Maintenance Restored ", "Count :" + dates.size());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.i("Loading Maintenance", "Failed attempt");
+                    }
+
+                    Log.i("Retrieved info", "Log count :" + dates.size());
+                    if (dates.size() > 0 && logs.size() > 0 && costs.size() > 0) {
+                        // we've checked there is some info
+                        if (dates.size() == logs.size() && logs.size() == costs.size()) {
+                            // we've checked each item has the same amount of info, nothing is missing
+                            for (int x = 0; x < dates.size(); x++) {
+                                Date thisDate = new Date();
+                                try {
+                                    thisDate = sdf.parse(dates.get(x));
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                Log.i("Trying to Add", "" + x);
+
+                                Boolean wasItAService = Boolean.valueOf(wasService.get(x));
+                                Boolean wasItAMOT = Boolean.valueOf(wasMOT.get(x));
+                                Boolean wasBrakePads = Boolean.valueOf(brakePads.get(x));
+                                Boolean wasBrakeDiscs = Boolean.valueOf(brakeDiscs.get(x));
+                                Boolean wasFrontTyre = Boolean.valueOf(frontTyre.get(x));
+                                Boolean wasRearTyre = Boolean.valueOf(rearTyre.get(x));
+                                Boolean wasOilChange = Boolean.valueOf(oilChange.get(x));
+                                Boolean wasNewBattery = Boolean.valueOf(newBattery.get(x));
+                                Boolean wasCoolantChange = Boolean.valueOf(coolantChange.get(x));
+                                Boolean wasSparkPlugs = Boolean.valueOf(sparkPlugs.get(x));
+                                Boolean wasAirFilter = Boolean.valueOf(airFilter.get(x));
+                                Boolean wasBrakeFluid = Boolean.valueOf(brakeFluid.get(x));
+
+                                maintenanceLogDetails newLog = new maintenanceLogDetails(thisDate, logs.get(x), Double.parseDouble(costs.get(x)), Double.parseDouble(mileage.get(x)), wasItAService, wasItAMOT, wasBrakePads
+                                        , wasBrakeDiscs, wasFrontTyre, wasRearTyre, wasOilChange, wasNewBattery, wasCoolantChange, wasSparkPlugs, wasAirFilter, wasBrakeFluid);
+
+                                Log.i("Added", "" + x + "" + newLog);
+                                thisBike.maintenanceLogs.add(newLog);
+                            }
+                        }
+                    }
+                } while (c.moveToNext());
+
+            } catch (Exception e) {
+
+                Log.i("LoadingMaintDB", "Caught Error");
+                e.printStackTrace();
+            }
+        }
+    }
+    
     @Override
     public void onBackPressed() {
         // this must be empty as back is being dealt with in onKeyDown

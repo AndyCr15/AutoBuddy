@@ -111,6 +111,27 @@ public class maintenanceLogDetails implements Comparable<maintenanceLogDetails> 
         }
     }
 
+    public maintenanceLogDetails(String date, String log, double price, double mileage) {
+        // only used for the import
+
+        this.date = date;
+        this.log = log;
+        this.price = price;
+        this.mileage = mileage;
+        this.wasService = false;
+        this.wasMOT = false;
+        this.brakePads = false;
+        this.brakeDiscs = false;
+        this.frontTyre = false;
+        this.rearTyre = false;
+        this.oilChange = false;
+        this.newBattery = false;
+        this.coolantChange = false;
+        this.sparkPlugs = false;
+        this.airFilter = false;
+        this.brakeFluid = false;
+    }
+
     public String getDate() {
         return date;
     }
