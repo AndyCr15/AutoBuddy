@@ -12,6 +12,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -47,6 +49,7 @@ import static com.androidandyuk.autobuddy.MainActivity.precision;
 import static com.androidandyuk.autobuddy.MainActivity.sdf;
 import static com.androidandyuk.autobuddy.MainActivity.sharedPreferences;
 import static com.androidandyuk.autobuddy.MainActivity.vehiclesDB;
+import static com.androidandyuk.autobuddy.R.id.searchBox;
 
 public class Maintenance extends AppCompatActivity {
 
@@ -58,6 +61,7 @@ public class Maintenance extends AppCompatActivity {
     public static RelativeLayout main;
 
     TextView setLogDate;
+    EditText search;
 
     String searchItem = "";
 
@@ -127,6 +131,25 @@ public class Maintenance extends AppCompatActivity {
 
         });
 
+        search = (EditText) findViewById(searchBox);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchItem = search.getText().toString();
+                initiateList();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         logDateSetListener = new DatePickerDialog.OnDateSetListener()
 
         {
@@ -143,7 +166,7 @@ public class Maintenance extends AppCompatActivity {
     }
 
     public void setSearch(View view) {
-        EditText search = (EditText) findViewById(R.id.searchBox);
+
 
         searchItem = search.getText().toString();
 

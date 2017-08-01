@@ -95,7 +95,8 @@
         <activity
             android:name=".Fuelling"
             android:label="Fueling"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".Garage"
             android:label="Garage"
@@ -104,7 +105,7 @@
             android:name=".Maintenance"
             android:label="Maintenance"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".GroupRide"
             android:label="Group Ride"

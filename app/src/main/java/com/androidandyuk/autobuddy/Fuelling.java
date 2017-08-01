@@ -111,9 +111,8 @@ public class Fuelling extends AppCompatActivity {
         petrolPrice = (EditText) findViewById(R.id.petrolPrice);
         litresUsed = (EditText) findViewById(R.id.litresUsed);
         mileageText = (EditText) findViewById(R.id.mileageET);
-        milesDoneTV = (TextView) findViewById(R.id.milesDoneTextView);
 
-        milesDoneTV.setText(milesSetting + " done");
+        milesDone.setHint(milesSetting + " done");
 
         Log.i("Fuelling", "Loading Fuels");
         loadFuels();
@@ -810,8 +809,7 @@ public class Fuelling extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // could be coming back from a settings change, so set these just in case they changed
-        milesDoneTV = (TextView) findViewById(R.id.milesDoneTextView);
-        milesDoneTV.setText(milesSetting + " done");
+        milesDone.setHint(milesSetting + " done");
         myAdapter.notifyDataSetChanged();
 
         checkBackground();
