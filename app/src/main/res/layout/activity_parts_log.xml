@@ -47,6 +47,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -54,9 +55,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Brake Pads"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -64,10 +65,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -75,16 +76,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -92,9 +94,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Brake Discs"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -102,10 +104,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -113,16 +115,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -132,9 +135,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Front Tyres"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -142,10 +145,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -153,10 +156,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -164,6 +167,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -173,9 +177,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Rear Tyres"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -183,10 +187,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -194,16 +198,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -213,9 +218,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Oil Change"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -223,10 +228,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -234,16 +239,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -253,9 +259,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="New Battery"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -263,10 +269,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -274,16 +280,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -293,9 +300,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Coolant"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -303,10 +310,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -314,16 +321,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -333,9 +341,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Spark Plugs"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -343,10 +351,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -354,16 +362,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -373,9 +382,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Air Filter"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -383,10 +392,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -394,16 +403,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -413,9 +423,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Brake Fluid"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -423,10 +433,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
 
                 <TextView
@@ -434,10 +444,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="n/a"
                     android:textAlignment="center"
+                    android:textColor="@color/colorGrey"
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -449,7 +459,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:background="@drawable/rounded_corners_grey_orange"
-            android:padding="8dp"
+            android:padding="12dp"
             android:text="These are all taken from your maintenance logs. When you fit a new part, select it on the buttons at the bottom of your maintenance log." />
 
     </LinearLayout>

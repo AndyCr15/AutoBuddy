@@ -5,12 +5,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -20,14 +32,26 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -40,14 +64,22 @@ import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
 import static com.androidandyuk.autobuddy.MainActivity.bikes;
 import static com.androidandyuk.autobuddy.MainActivity.conversion;
 import static com.androidandyuk.autobuddy.MainActivity.currencySetting;
+import static com.androidandyuk.autobuddy.MainActivity.currentForecast;
+import static com.androidandyuk.autobuddy.MainActivity.jsonObject;
+import static com.androidandyuk.autobuddy.MainActivity.locationListener;
+import static com.androidandyuk.autobuddy.MainActivity.locationManager;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
 import static com.androidandyuk.autobuddy.MainActivity.oneDecimal;
 import static com.androidandyuk.autobuddy.MainActivity.precision;
 import static com.androidandyuk.autobuddy.MainActivity.saveBikes;
+import static com.androidandyuk.autobuddy.MainActivity.saveSettings;
 import static com.androidandyuk.autobuddy.MainActivity.sdf;
+import static com.androidandyuk.autobuddy.MainActivity.user;
+import static com.androidandyuk.autobuddy.MainActivity.userLatLng;
+import static com.androidandyuk.autobuddy.MainActivity.userLocationForWeather;
 import static com.androidandyuk.autobuddy.Maintenance.loadLogs;
 
-public class Garage extends AppCompatActivity {
+public class Garage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
@@ -57,10 +89,9 @@ public class Garage extends AppCompatActivity {
 
     public static RelativeLayout main;
 
-    View addingBikeInfo;
-    EditText bikeMake;
-    EditText bikeModel;
-    EditText bikeYear;
+    public static EditText bikeMake;
+    public static EditText bikeModel;
+    public static EditText bikeYear;
     TextView aveMPG;
     TextView milesDone;
     TextView bikeEstMileage;
@@ -69,6 +100,12 @@ public class Garage extends AppCompatActivity {
     TextView MOTdue;
     TextView serviceDue;
     Spinner taxDue;
+
+    public static ImageView shield;
+
+    public static View addingBikeInfo;
+    public static View getDetailsView;
+    public static Boolean editingBike = false;
 
     TextView bikeTitle;
     EditText bikeNotes;
@@ -87,6 +124,18 @@ public class Garage extends AppCompatActivity {
 
         // until I implement landscape view, lock the orientation
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
 //        if (bikes.size() == 0) {
 //            // for testing
@@ -107,6 +156,10 @@ public class Garage extends AppCompatActivity {
         serviceDue = (TextView) findViewById(R.id.serviceDue);
         taxDue = (Spinner) findViewById(R.id.taxSpinner);
 
+        getDetailsView = findViewById(R.id.getDetails);
+        addingBikeInfo = findViewById(R.id.addingBikeInfo);
+
+        shield = (ImageView) findViewById(R.id.shield);
 
         taxDue.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, TaxDue.values()));
 
@@ -122,16 +175,168 @@ public class Garage extends AppCompatActivity {
         garageSetup();
         setListeners();
 
-
-        /**
-         * Hides the soft keyboard
-         */
+//         Hides the soft keyboard
         if (getCurrentFocus() != null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
 
 
+        //      download the weather
+        DownloadTask task = new DownloadTask();
+
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                //centerMapOnLocation(location, "Your location");
+
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+
+            }
+        };
+
+        userLatLng = new LatLng(51.5412794, -0.2799549);  //  default to Ace Cafe until location is overwritten
+
+        user = new markedLocation("You", "", userLatLng, "");
+
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10800000, 1000, locationListener);
+
+            Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            Log.i("lastKnownLocation", "" + lastKnownLocation);
+            if (lastKnownLocation != null) {
+                user.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
+            }
+
+        if (user.location != null) {
+            //change this to be users location
+            double userLat = user.location.latitude;
+            double userLon = user.location.longitude;
+            String userLocation = "lat=" + userLat + "&lon=" + userLon;
+            userLocationForWeather = "http://api.openweathermap.org/data/2.5/weather?" + userLocation + "&APPID=81e5e0ca31ad432ee9153dd761ed3b27";
+            Log.i("Getting Weather", userLocationForWeather);
+            task.execute(userLocationForWeather);
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    public class DownloadTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            String result = "";
+            URL url;
+            HttpURLConnection urlConnection = null;
+
+            try {
+                url = new URL(urls[0]);
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+
+                InputStream in = urlConnection.getInputStream();
+
+                InputStreamReader reader = new InputStreamReader(in);
+
+                int data = reader.read();
+
+                while (data != -1) {
+
+                    char current = (char) data;
+
+                    result += current;
+
+                    data = reader.read();
+
+                }
+
+                return result;
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if (result != null) {
+                try {
+
+                    jsonObject = new JSONObject(result);
+
+                    String weatherInfo = jsonObject.getString("weather");
+
+                    Log.i("Weather content", weatherInfo);
+
+                    JSONArray arr = new JSONArray(weatherInfo);
+
+                    for (int i = 0; i < arr.length(); i++) {
+
+                        JSONObject jsonPart = arr.getJSONObject(i);
+
+                        Log.i("main", jsonPart.getString("main"));
+                        Log.i("description", jsonPart.getString("description"));
+
+                        currentForecast = jsonPart.getString("main");
+                        showWeather();
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+        }
     }
 
     public int getEnumPos(String thisEnum) {
@@ -162,6 +367,11 @@ public class Garage extends AppCompatActivity {
                 return 12;
         }
         return 1;
+    }
+
+    public void showWeather(){
+        Snackbar.make(findViewById(R.id.main), "Today's Forecast is : " + currentForecast, Snackbar.LENGTH_SHORT)
+                .setAction("Action", null).show();
     }
 
     public void setListeners() {
@@ -234,26 +444,43 @@ public class Garage extends AppCompatActivity {
             // show only 2 decimal places.  Precision is declared in MainActivity to 2 decimal places
             Calendar cal = Calendar.getInstance();
             int year = cal.get(Calendar.YEAR);
-            cal.set(Calendar.YEAR, year-1);
+            cal.set(Calendar.YEAR, year - 1);
             Date lastYear = cal.getTime();
 
-            milesDone.setText(oneDecimal.format(milesSince(lastYear)));
+            TextView mDTV = (TextView) findViewById(R.id.milesDone);
+            TextView cpm = (TextView) findViewById(R.id.spentText);
 
-            costPerMile.setText(currencySetting + precision.format((maintSpentSince(lastYear) + petrolSpentSince(lastYear))/milesSince(lastYear)));
+            String unit = " Mi";
+            Double odometer = milesSince(lastYear);
+            if (milesSetting.equals("Km")) {
+                mDTV.setText("KM Done");
+                cpm.setText("Cost Per KM");
+                odometer = odometer / conversion;
+                unit = " Km";
+            } else {
+                mDTV.setText("Miles Done");
+                cpm.setText("Cost Per Mile");
+                unit = " Mi";
+            }
+            String mD = oneDecimal.format(odometer) + unit;
+            milesDone.setText(mD);
 
-            aveMPG.setText(precision.format(milesSince(lastYear) / (litresSince(lastYear)/ 4.54609)));
+            Double distance = milesSince(lastYear);
+            if (milesSetting.equals("Km")) {
+                distance = distance / conversion;
+            }
+            costPerMile.setText(currencySetting + precision.format((maintSpentSince(lastYear) + petrolSpentSince(lastYear)) / distance));
+
+            aveMPG.setText(precision.format(milesSince(lastYear) / (litresSince(lastYear) / 4.54609)));
 
             bikeEstMileage.setText("tbc");
             if (bikes.get(activeBike).estMileage > 0) {
                 Double estMile = bikes.get(activeBike).estMileage;
                 // check what setting the user has, Miles or Km
                 // if Km, convert to Miles for display
-                String unit = "";
+
                 if (milesSetting.equals("Km")) {
                     estMile = estMile / conversion;
-                    unit = " Km";
-                } else {
-                    unit = " Mi";
                 }
                 bikeEstMileage.setText(oneDecimal.format(estMile) + unit);
             }
@@ -292,6 +519,13 @@ public class Garage extends AppCompatActivity {
             } else {
                 taxDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey_orange));
             }
+            bikeTitle.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    editBike();
+                    return true;
+                }
+            });
         }
     }
 
@@ -303,6 +537,14 @@ public class Garage extends AppCompatActivity {
             Garage.main.setBackground(drawablePic);
         } else {
             Garage.main.setBackgroundColor(getResources().getColor(R.color.background));
+        }
+    }
+
+    public void shieldClicked(View view) {
+        if (addingBikeInfo.isShown() || getDetailsView.isShown()) {
+            addingBikeInfo.setVisibility(View.INVISIBLE);
+            getDetailsView.setVisibility(View.INVISIBLE);
+            shield.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -371,7 +613,7 @@ public class Garage extends AppCompatActivity {
         return spend;
     }
 
-    public static double maintSpentSince(Date date){
+    public static double maintSpentSince(Date date) {
         Double spendCount = 0d;
         for (int i = 0; i < bikes.get(activeBike).maintenanceLogs.size(); i++) {
             Date testDate = null;
@@ -387,7 +629,7 @@ public class Garage extends AppCompatActivity {
         return spendCount;
     }
 
-    public static double petrolSpentSince(Date date){
+    public static double petrolSpentSince(Date date) {
         Double petrolCount = 0d;
         for (int i = 0; i < bikes.get(activeBike).fuelings.size(); i++) {
             Date testDate = null;
@@ -403,7 +645,7 @@ public class Garage extends AppCompatActivity {
         return petrolCount;
     }
 
-    public static double litresSince(Date date){
+    public static double litresSince(Date date) {
         Double petrolCount = 0d;
         for (int i = 0; i < bikes.get(activeBike).fuelings.size(); i++) {
             Date testDate = null;
@@ -449,7 +691,7 @@ public class Garage extends AppCompatActivity {
         }
     }
 
-    public Double milesSince(Date date){
+    public Double milesSince(Date date) {
         Double countMileage = 0d;
         for (int i = 0; i < bikes.get(activeBike).fuelings.size(); i++) {
             Date testDate = null;
@@ -473,7 +715,6 @@ public class Garage extends AppCompatActivity {
 
     public void addBike(View view) {
         Log.i("Bike", "Add bike");
-        View addingBikeInfo = findViewById(R.id.addingBikeInfo);
 
         // clear out any previous details
         bikeMake.setText("");
@@ -481,10 +722,33 @@ public class Garage extends AppCompatActivity {
         bikeYear.setText("");
 
         addingBikeInfo.setVisibility(View.VISIBLE);
+        shield.setVisibility(View.VISIBLE);
+
+    }
+
+    public void nextBike(View view){
+        Log.i("Next Bike","activeBike " + activeBike);
+        activeBike++;
+        if(activeBike > (bikes.size()-1)){
+            activeBike = 0;
+        }
+        garageSetup();
+    }
+
+    public void editBike() {
+        if (activeBike >= 0) {
+            editingBike = true;
+            addingBikeInfo.setVisibility(View.VISIBLE);
+            shield.setVisibility(View.VISIBLE);
+            bikeMake.setText(bikes.get(activeBike).make);
+            bikeModel.setText(bikes.get(activeBike).model);
+            bikeYear.setText(bikes.get(activeBike).yearOfMan);
+        }
+
     }
 
     public void addNewBike(View view) {
-changingBikes();
+        changingBikes();
         String make = bikeMake.getText().toString();
         String model = bikeModel.getText().toString();
         String year = bikeYear.getText().toString();
@@ -495,26 +759,39 @@ changingBikes();
             Toast.makeText(Garage.this, "Please complete all necessary details", Toast.LENGTH_LONG).show();
 
         } else {
-
             // check the year looks correct
-            if (Integer.parseInt(year) > 1900 && Integer.parseInt(year) < 2050) {
-                Bike newBike = new Bike(make, model, year);
+            if (Integer.parseInt(year) > 1900 && Integer.parseInt(year) < 2100) {
+                if (editingBike) {
 
-                bikes.add(newBike);
+                    bikes.get(activeBike).make = make;
+                    bikes.get(activeBike).model = model;
+                    bikes.get(activeBike).yearOfMan = year;
+                    editingBike = false;
 
-                activeBike = bikes.size() - 1;
-                saveBikes();
-                garageSetup();
+                } else {
+                    // we're not editing, so it must be a new bike
+                    Bike newBike = new Bike(make, model, year);
 
+                    bikes.add(newBike);
+
+                    activeBike = bikes.size() - 1;
+
+                }
+
+                Log.i("Adding Bike","Global Code");
                 // hide keyboard
                 View viewAddBike = this.getCurrentFocus();
                 if (viewAddBike != null) {
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(viewAddBike.getWindowToken(), 0);
                 }
-                View addingBikeInfo = findViewById(R.id.addingBikeInfo);
+
                 addingBikeInfo.setVisibility(View.INVISIBLE);
+                shield.setVisibility(View.INVISIBLE);
+                saveBikes();
+                saveSettings();
                 invalidateOptionsMenu();
+                garageSetup();
 
             } else {
 
@@ -525,7 +802,7 @@ changingBikes();
         }
     }
 
-    public void deleteBike(View view) {
+    public void deleteBike() {
 
         if (activeBike > -1) {
             Log.i("Delete Bike", "" + bikes.get(activeBike));
@@ -558,9 +835,8 @@ changingBikes();
 
     public void getDetails(String hint) {
         Log.i("Get Details", hint);
-//        final String[] detail = new String[1];
-        final View getDetails = findViewById(R.id.getDetails);
-        getDetails.setVisibility(View.VISIBLE);
+        getDetailsView.setVisibility(View.VISIBLE);
+        shield.setVisibility(View.VISIBLE);
         final EditText reg = (EditText) findViewById(R.id.getDetailsText);
         reg.setHint(hint);
         if (!bikes.get(activeBike).registration.equals("unknown")) {
@@ -578,7 +854,8 @@ changingBikes();
                         (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     // Perform action on key press
                     detail = reg.getText().toString().toUpperCase();
-                    getDetails.setVisibility(View.INVISIBLE);
+                    getDetailsView.setVisibility(View.INVISIBLE);
+                    shield.setVisibility(View.INVISIBLE);
                     bikes.get(activeBike).registration = detail;
                     myRegView = (TextView) findViewById(R.id.clickable_reg_view);
                     myRegView.setText(detail);
@@ -607,6 +884,13 @@ changingBikes();
     public void goToToDo(View view) {
         if (activeBike > -1) {
             Intent intent = new Intent(getApplicationContext(), ToDo.class);
+            startActivity(intent);
+        }
+    }
+
+    public void goToFuelling(View view) {
+        if (activeBike > -1) {
+            Intent intent = new Intent(getApplicationContext(), Fuelling.class);
             startActivity(intent);
         }
     }
@@ -642,11 +926,13 @@ changingBikes();
         super.onCreateOptionsMenu(menu);
 
         menu.add(0, 0, 0, "Settings").setShortcut('3', 'c');
-
-        for (int i = 0; i < bikes.size(); i++) {
+        int i;
+        for (i = 0; i < bikes.size(); i++) {
             String bikeMakeMenu = bikes.get(i).model;
             menu.add(0, i + 1, 0, bikeMakeMenu).setShortcut('3', 'c');
         }
+        menu.add(0, 10, 0, "Annual Reports").setShortcut('3', 'c');
+        menu.add(0, 11, 0, "Delete Vehicle").setShortcut('3', 'c');
         return true;
     }
 
@@ -711,6 +997,16 @@ changingBikes();
                 activeBike = 8;
                 garageSetup();
                 return true;
+            case 10:
+                Log.i("Option", "10");
+                Intent thisIntent = new Intent(getApplicationContext(), AnnualReports.class);
+                startActivity(thisIntent);
+                return true;
+            case 11:
+                Log.i("Option", "11");
+                deleteBike();
+                garageSetup();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -738,6 +1034,7 @@ changingBikes();
                             public void onClick(DialogInterface dialog, int which) {
                                 addingBikeInfo.setVisibility(View.INVISIBLE);
                                 getDetails.setVisibility(View.INVISIBLE);
+                                shield.setVisibility(View.INVISIBLE);
                             }
                         })
                         .setNegativeButton("Keep", null)
@@ -755,6 +1052,7 @@ changingBikes();
     @Override
     protected void onPause() {
         changingBikes();
+        saveSettings();
         super.onPause();
     }
 
@@ -764,5 +1062,91 @@ changingBikes();
         Log.i("Garage", "onResume");
         garageSetup();
         checkBackground();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_garage) {
+
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+
+        } else if (id == R.id.nav_maint) {
+
+            Intent intent = new Intent(getApplicationContext(), Maintenance.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_fuel) {
+
+            Intent intent = new Intent(getApplicationContext(), Fuelling.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_todo) {
+
+            Intent intent = new Intent(getApplicationContext(), ToDo.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_parts) {
+
+            Intent intent = new Intent(getApplicationContext(), PartsLog.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_settings) {
+
+            Intent intent = new Intent(getApplicationContext(), Settings.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_reports) {
+
+            Intent intent = new Intent(getApplicationContext(), AnnualReports.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_favs) {
+
+            Intent intent = new Intent(getApplicationContext(), Favourites.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_track) {
+
+            Intent intent = new Intent(getApplicationContext(), RaceTracks.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_biker) {
+
+            Intent intent = new Intent(getApplicationContext(), HotSpots.class);
+            startActivity(intent);
+
+        }else if (id == R.id.nav_shows) {
+
+            Intent intent = new Intent(getApplicationContext(), CarShows.class);
+            startActivity(intent);
+
+        }else if (id == R.id.nav_traffic) {
+
+            Intent intent = new Intent(getApplicationContext(), Traffic.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_delete) {
+
+            deleteBike();
+
+        } else if (id == R.id.nav_backup) {
+
+            Settings.exportDB();
+
+        } else if (id == R.id.nav_restore) {
+
+            Settings.importDB();
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+
     }
 }

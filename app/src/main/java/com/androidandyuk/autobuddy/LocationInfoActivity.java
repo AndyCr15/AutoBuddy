@@ -16,7 +16,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,6 +39,7 @@ import java.net.URL;
 import static com.androidandyuk.autobuddy.HotSpots.hotspotLocations;
 import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
 import static com.androidandyuk.autobuddy.MainActivity.jsonObject;
+import static com.androidandyuk.autobuddy.MainActivity.userLatLng;
 import static com.androidandyuk.autobuddy.RaceTracks.trackLocations;
 
 public class LocationInfoActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -54,13 +54,13 @@ public class LocationInfoActivity extends FragmentActivity implements OnMapReady
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.androidandyuk.autobuddy.R.layout.activity_location_info);
+        setContentView(R.layout.activity_location_info);
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(com.androidandyuk.autobuddy.R.id.map);
+                .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
@@ -82,10 +82,9 @@ public class LocationInfoActivity extends FragmentActivity implements OnMapReady
 
         Log.i("Location Info Activity", "On Map Ready");
 
-        EditText locationName = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.locationName);
-        EditText locationAddress = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.locationAddress);
-        EditText locationComment = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.locationComment);
-
+        EditText locationName = (EditText) findViewById(R.id.locationName);
+        EditText locationAddress = (EditText) findViewById(R.id.locationAddress);
+        EditText locationComment = (EditText) findViewById(R.id.locationComment);
 
         // read in the reason the map has been called
         Intent intent = getIntent();
@@ -101,12 +100,6 @@ public class LocationInfoActivity extends FragmentActivity implements OnMapReady
                 temp = Favourites.favouriteLocations.get(favItem);
                 centerMapOnLocation(temp.location, temp.name);
                 Log.i("Fav selected", "" + temp.name);
-
-                // download the weather for this location
-                String thisLoc = "lat=" + temp.location.latitude + "&lon=" + temp.location.longitude;
-                Log.i("Fav location", thisLoc);
-                WeatherDownload task = new WeatherDownload();
-                task.execute("http://api.openweathermap.org/data/2.5/weather?" + thisLoc + "&APPID=81e5e0ca31ad432ee9153dd761ed3b27");
 
                 locationName.setText(temp.name);
                 locationAddress.setText(temp.address);
@@ -174,35 +167,62 @@ public class LocationInfoActivity extends FragmentActivity implements OnMapReady
             } else if (favItem == 9998) {
                 MapsActivity.showMarkers(trackLocations, 0);
             }
-        }
 
+        }
+        // download the weather for this location
+        String thisLoc = "lat=" + temp.location.latitude + "&lon=" + temp.location.longitude;
+        WeatherDownload task = new WeatherDownload();
+        task.execute("http://api.openweathermap.org/data/2.5/weather?" + thisLoc + "&APPID=81e5e0ca31ad432ee9153dd761ed3b27");
     }
 
-    public void saveChanges(View view) {
+    public void saveChanges() {
         // saves the changes made while viewing the location info
         Log.i("Location Info Activity", "Saving Changes");
 
-        EditText locationName = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.locationName);
-        EditText locationAddress = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.locationAddress);
-        EditText locationComment = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.locationComment);
+        EditText locationName = (EditText) findViewById(R.id.locationName);
+        EditText locationAddress = (EditText) findViewById(R.id.locationAddress);
+        EditText locationComment = (EditText) findViewById(R.id.locationComment);
 
         // find a way to return the edited text into the correct object
         temp.name = locationName.getText().toString();
         temp.address = locationAddress.getText().toString();
         temp.comment = locationComment.getText().toString();
 
-        Toast.makeText(this, "Info updated for " + temp.name, Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "Info updated for " + temp.name, Toast.LENGTH_LONG).show();
 
     }
 
+    public void navigateTo(View view){
+
+        Log.i("UserLatLng","" + userLatLng);
+        Log.i("DestLatLng","" + temp.location);
+
+
+        double latitude = temp.location.latitude;
+        double longitude = temp.location.longitude;
+        String label = temp.name;
+        String uriBegin = "geo:" + latitude + "," + longitude;
+        String query = latitude + "," + longitude + "(" + label + ")";
+        String encodedQuery = Uri.encode(query);
+        String uriString = uriBegin + "?q=" + encodedQuery + "&z=16";
+        Uri uri = Uri.parse(uriString);
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, uri);
+        startActivity(intent);
+
+
+//        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+//                Uri.parse("http://maps.google.com/maps?saddr=20.344,34.34&daddr=20.5666,45.345"));
+//        startActivity(intent);
+    }
+
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
+        main = (RelativeLayout) findViewById(R.id.main);
         if(backgroundsWanted){
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             LocationInfoActivity.main.setBackground(drawablePic);
         } else {
-            LocationInfoActivity.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            LocationInfoActivity.main.setBackgroundColor(getResources().getColor(R.color.background));
         }
     }
 
@@ -307,8 +327,8 @@ public class LocationInfoActivity extends FragmentActivity implements OnMapReady
 
                         thisForecast = jsonPart.getString("main");
 
-                        TextView locationWeather = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.locationWeather);
-                        locationWeather.setText("Weather here is " + thisForecast);
+                        TextView locationWeather = (TextView) findViewById(R.id.locationWeather);
+                        locationWeather.setText("Weather at this location : " + thisForecast);
                     }
 
 
@@ -325,5 +345,11 @@ public class LocationInfoActivity extends FragmentActivity implements OnMapReady
     protected void onResume() {
         super.onResume();
         checkBackground();
+    }
+
+    @Override
+    protected void onPause() {
+        saveChanges();
+        super.onPause();
     }
 }

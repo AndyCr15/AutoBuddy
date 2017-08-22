@@ -1,6 +1,5 @@
 package com.androidandyuk.autobuddy;
 
-import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -14,19 +13,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,16 +28,9 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -103,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     public static int lastHowManyFuels;
     public static boolean incCarEvents;
     public static boolean incBikeEvents;
+    public static String jsonLocation = "http://www.lanarchy.co.uk/";
     public static boolean backgroundsWanted;
 
     public static SQLiteDatabase vehiclesDB;
@@ -135,6 +122,11 @@ public class MainActivity extends AppCompatActivity {
 
         loadSettings();
 
+        // check if there are any bikes
+        if(bikes.size()==0){
+            activeBike = -1;
+        }
+
         // requesting permissions to access storage and location
         Log.i("storageAccepted " + storageAccepted, "locationAccepted " + locationAccepted);
         if (!storageAccepted || !locationAccepted) {
@@ -161,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
             ed.putBoolean("updateNeeded3", false).apply();
             saveBikes();
             loadShows();
-            activeBike = 0;
         } else {
             loadBikes();
             loadFuels();
@@ -172,72 +163,68 @@ public class MainActivity extends AppCompatActivity {
         checkMOTwarning();
         checkServiceWarning();
 
-        // check if there are any bikes
-        if (bikes.size() == 0) {
-            activeBike = -1;
-        }
-
-        //      download the weather
-        weatherText = (TextView) findViewById(R.id.weatherView);
-        DownloadTask task = new DownloadTask();
-
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-
-                //centerMapOnLocation(location, "Your location");
-
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-
-            }
-        };
-
-        userLatLng = new LatLng(51.5412794, -0.2799549);  //  default to Ace Cafe until location is overwritten
-
-        user = new markedLocation("You", "", userLatLng, "");
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10800000, 1000, locationListener);
-
-            Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-            Log.i("lastKnownLocation", "" + lastKnownLocation);
-            if (lastKnownLocation != null) {
-                user.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
-            }
-        }
-
-        if (user.location != null) {
-            //change this to be users location
-            double userLat = user.location.latitude;
-            double userLon = user.location.longitude;
-            String userLocation = "lat=" + userLat + "&lon=" + userLon;
-            userLocationForWeather = "http://api.openweathermap.org/data/2.5/weather?" + userLocation + "&APPID=81e5e0ca31ad432ee9153dd761ed3b27";
-            Log.i("Getting Weather", userLocationForWeather);
-            task.execute(userLocationForWeather);
-
-        }
+//        //      download the weather
+//        weatherText = (TextView) findViewById(R.id.weatherView);
+//        DownloadTask task = new DownloadTask();
+//
+//        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+//
+//        locationListener = new LocationListener() {
+//            @Override
+//            public void onLocationChanged(Location location) {
+//
+//                //centerMapOnLocation(location, "Your location");
+//
+//            }
+//
+//            @Override
+//            public void onStatusChanged(String s, int i, Bundle bundle) {
+//
+//            }
+//
+//            @Override
+//            public void onProviderEnabled(String s) {
+//
+//            }
+//
+//            @Override
+//            public void onProviderDisabled(String s) {
+//
+//            }
+//        };
+//
+//        userLatLng = new LatLng(51.5412794, -0.2799549);  //  default to Ace Cafe until location is overwritten
+//
+//        user = new markedLocation("You", "", userLatLng, "");
+//
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//
+//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10800000, 1000, locationListener);
+//
+//            Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//
+//            Log.i("lastKnownLocation", "" + lastKnownLocation);
+//            if (lastKnownLocation != null) {
+//                user.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
+//            }
+//        }
+//
+//        if (user.location != null) {
+//            //change this to be users location
+//            double userLat = user.location.latitude;
+//            double userLon = user.location.longitude;
+//            String userLocation = "lat=" + userLat + "&lon=" + userLon;
+//            userLocationForWeather = "http://api.openweathermap.org/data/2.5/weather?" + userLocation + "&APPID=81e5e0ca31ad432ee9153dd761ed3b27";
+//            Log.i("Getting Weather", userLocationForWeather);
+//            task.execute(userLocationForWeather);
+//
+//        }
 
         Favourites.loadFavs();
         Favourites.sortMyList();
 
-        changeHeader();
+        Intent intent = new Intent(getApplicationContext(), Garage.class);
+        startActivity(intent);
 
     }
 
@@ -259,87 +246,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-    }
-
-    public void changeHeader() {
-        TextView selectedVehicle = (TextView) findViewById(R.id.selectedVehicle);
-        if (activeBike > -1) {
-            selectedVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.bike_choice, menu);
-        super.onCreateOptionsMenu(menu);
-        menu.add(0, 0, 0, "Settings").setShortcut('3', 'c');
-
-        for (int i = 0; i < bikes.size(); i++) {
-            String bikeMakeMenu = bikes.get(i).model;
-            menu.add(0, i + 1, 0, bikeMakeMenu).setShortcut('3', 'c');
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
-        switch (item.getItemId()) {
-            case 0:
-                Log.i("Option", "0");
-                intent = new Intent(getApplicationContext(), Settings.class);
-                startActivity(intent);
-//                Toast.makeText(MainActivity.this, "Settings not yet implemented", Toast.LENGTH_LONG).show();
-                return true;
-            case 1:
-                Log.i("Option", "1");
-                activeBike = 0;
-                changeHeader();
-                return true;
-            case 2:
-                Log.i("Option", "2");
-                activeBike = 1;
-                changeHeader();
-                return true;
-            case 3:
-                Log.i("Option", "3");
-                activeBike = 2;
-                changeHeader();
-                return true;
-            case 4:
-                Log.i("Option", "4");
-                activeBike = 3;
-                changeHeader();
-                return true;
-            case 5:
-                Log.i("Option", "5");
-                activeBike = 4;
-                changeHeader();
-                return true;
-            case 6:
-                Log.i("Option", "6");
-                activeBike = 5;
-                changeHeader();
-                return true;
-            case 7:
-                Log.i("Option", "7");
-                activeBike = 6;
-                changeHeader();
-                return true;
-            case 8:
-                Log.i("Option", "8");
-                activeBike = 7;
-                changeHeader();
-                return true;
-            case 9:
-                Log.i("Option", "9");
-                activeBike = 8;
-                changeHeader();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public static boolean checkInRange(String due, Calendar testDate) {
@@ -464,87 +370,86 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, "Not yet implemented", Toast.LENGTH_LONG).show();
     }
 
-    public void loadWeather(View view) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.bbc.co.uk/weather/"));
-        startActivity(browserIntent);
-    }
-
-
-    public class DownloadTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... urls) {
-
-            String result = "";
-            URL url;
-            HttpURLConnection urlConnection = null;
-
-            try {
-                url = new URL(urls[0]);
-
-                urlConnection = (HttpURLConnection) url.openConnection();
-
-                InputStream in = urlConnection.getInputStream();
-
-                InputStreamReader reader = new InputStreamReader(in);
-
-                int data = reader.read();
-
-                while (data != -1) {
-
-                    char current = (char) data;
-
-                    result += current;
-
-                    data = reader.read();
-
-                }
-
-                return result;
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            if (result != null) {
-                try {
-
-                    jsonObject = new JSONObject(result);
-
-                    String weatherInfo = jsonObject.getString("weather");
-
-                    Log.i("Weather content", weatherInfo);
-
-                    JSONArray arr = new JSONArray(weatherInfo);
-
-                    for (int i = 0; i < arr.length(); i++) {
-
-                        JSONObject jsonPart = arr.getJSONObject(i);
-
-                        Log.i("main", jsonPart.getString("main"));
-                        Log.i("description", jsonPart.getString("description"));
-
-                        currentForecast = jsonPart.getString("main");
-                        weatherText.setText("Today's forecast: " + currentForecast);
-
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-
-        }
-    }
+//    public void loadWeather(View view) {
+//        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.bbc.co.uk/weather/"));
+//        startActivity(browserIntent);
+//    }
+//
+//    public class DownloadTask extends AsyncTask<String, Void, String> {
+//
+//        @Override
+//        protected String doInBackground(String... urls) {
+//
+//            String result = "";
+//            URL url;
+//            HttpURLConnection urlConnection = null;
+//
+//            try {
+//                url = new URL(urls[0]);
+//
+//                urlConnection = (HttpURLConnection) url.openConnection();
+//
+//                InputStream in = urlConnection.getInputStream();
+//
+//                InputStreamReader reader = new InputStreamReader(in);
+//
+//                int data = reader.read();
+//
+//                while (data != -1) {
+//
+//                    char current = (char) data;
+//
+//                    result += current;
+//
+//                    data = reader.read();
+//
+//                }
+//
+//                return result;
+//
+//            } catch (MalformedURLException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String result) {
+//            super.onPostExecute(result);
+//            if (result != null) {
+//                try {
+//
+//                    jsonObject = new JSONObject(result);
+//
+//                    String weatherInfo = jsonObject.getString("weather");
+//
+//                    Log.i("Weather content", weatherInfo);
+//
+//                    JSONArray arr = new JSONArray(weatherInfo);
+//
+//                    for (int i = 0; i < arr.length(); i++) {
+//
+//                        JSONObject jsonPart = arr.getJSONObject(i);
+//
+//                        Log.i("main", jsonPart.getString("main"));
+//                        Log.i("description", jsonPart.getString("description"));
+//
+//                        currentForecast = jsonPart.getString("main");
+//                        weatherText.setText("Today's forecast: " + currentForecast);
+//
+//                    }
+//
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//
+//        }
+//    }
 
     public static void checkUpdate() {
         updateNeeded = sharedPreferences.getBoolean("updateNeeded3", true);
@@ -565,7 +470,6 @@ public class MainActivity extends AppCompatActivity {
     public static void saveBikesOld() {
         Log.i("Main Activity", "New Saving Bikes");
         ed.putInt("bikeCount", Bike.bikeCount).apply();
-        ed.putInt("bikesSize", bikes.size()).apply();
 
         ArrayList<String> make = new ArrayList<>();
         ArrayList<String> model = new ArrayList<>();
@@ -669,7 +573,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i("saveBikesDB", "Size :" + bikes.size());
 
         try {
-
 
             vehiclesDB.delete("vehicles", null, null);
 
@@ -861,19 +764,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void loadSettings() {
+        int bikesSize = sharedPreferences.getInt("bikesSize", 0);
+        activeBike = sharedPreferences.getInt("activeBike", bikesSize - 1);
         lastHowManyFuels = sharedPreferences.getInt("lastHowManyFuels", 10);
         locationUpdatesTime = sharedPreferences.getInt("locationUpdatesTime", 1200000);
         incCarEvents = sharedPreferences.getBoolean("incCarEvents", true);
         incBikeEvents = sharedPreferences.getBoolean("incBikeEvents", true);
-        backgroundsWanted = sharedPreferences.getBoolean("backgroundsWanted", true);
+        backgroundsWanted = sharedPreferences.getBoolean("backgroundsWanted", false);
         locationAccepted = sharedPreferences.getBoolean("locationAccepted", false);
         storageAccepted = sharedPreferences.getBoolean("storageAccepted", false);
+        updateNeeded = sharedPreferences.getBoolean("updateNeeded3", true);
         currencySetting = sharedPreferences.getString("currencySetting", "£");
         milesSetting = sharedPreferences.getString("milesSetting", "Miles");
-        Log.i("LOAD storageAccepted " + storageAccepted, "locationAccepted " + locationAccepted);
     }
 
     public static void saveSettings() {
+        ed.putInt("activeBike", activeBike).apply();
         ed.putInt("lastHowManyFuels", lastHowManyFuels).apply();
         ed.putInt("locationUpdatesTime", locationUpdatesTime).apply();
         ed.putBoolean("incCarEvents", incCarEvents).apply();
@@ -881,9 +787,9 @@ public class MainActivity extends AppCompatActivity {
         ed.putBoolean("backgroundsWanted", backgroundsWanted).apply();
         ed.putBoolean("locationAccepted", locationAccepted).apply();
         ed.putBoolean("storageAccepted", storageAccepted).apply();
+        ed.putBoolean("updateNeeded3", updateNeeded).apply();
         ed.putString("currencySetting", currencySetting).apply();
         ed.putString("milesSetting", milesSetting).apply();
-        Log.i("SAVE storageAccepted " + storageAccepted, "locationAccepted " + locationAccepted);
     }
 
     @Override
@@ -901,15 +807,11 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         String theme = settings.getString("theme", "1");
         Log.i("Theme", theme);
-        setAppTheme(Integer.parseInt(theme));
-        changeHeader();
-        checkBackground();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i("Logs Activity", "On Pause");
         saveBikes();
         saveSettings();
         BackupManager bm = new BackupManager(this);
@@ -921,6 +823,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         Log.i("Logs Activity", "On Stop");
         saveBikes();
+        saveSettings();
         BackupManager bm = new BackupManager(this);
         bm.dataChanged();
     }

@@ -53,7 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.androidandyuk.autobuddy.R.layout.activity_maps);
+        setContentView(R.layout.activity_maps);
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -61,7 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(com.androidandyuk.autobuddy.R.id.map);
+                .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 

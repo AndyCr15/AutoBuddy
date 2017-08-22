@@ -8,40 +8,6 @@
     tools:context=".Settings">
 
     <LinearLayout
-        android:id="@+id/getDetails"
-        android:layout_width="270dp"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/rounded_corners_grey_orange"
-        android:elevation="24dp"
-        android:orientation="vertical"
-        android:visibility="invisible">
-
-        <EditText
-            android:id="@+id/getDetailsText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@drawable/rounded_corners"
-            android:hint="Enter Details"
-            android:textAlignment="center" />
-
-        <Button
-            android:id="@+id/submitDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@drawable/rounded_corners_grey"
-            android:onClick="submitPressed"
-            android:text="Submit" />
-
-    </LinearLayout>
-
-    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
@@ -291,7 +257,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     android:layout_weight="1"
-                    android:onClick="exportDB"
+                    android:onClick="exportDBPressed"
                     android:text="Backup"
                     android:textAlignment="textEnd"
                     android:textColor="@color/colorAccent"
@@ -304,7 +270,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     android:layout_weight="1"
-                    android:onClick="importDB"
+                    android:onClick="importDBPressed"
                     android:text="Restore"
                     android:textAlignment="textEnd"
                     android:textColor="@color/colorAccent"
@@ -359,6 +325,47 @@
             android:onClick="goToAbout"
             android:padding="4dp"
             android:text="About" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/shield"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="shieldClicked"
+        android:visibility="invisible" />
+
+    <LinearLayout
+        android:id="@+id/getDetails"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/rounded_corners_grey_orange"
+        android:elevation="24dp"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <EditText
+            android:id="@+id/getDetailsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/rounded_corners"
+            android:hint="Enter Details"
+            android:textAlignment="center" />
+
+        <Button
+            android:id="@+id/submitDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/rounded_corners_grey"
+            android:onClick="submitPressed"
+            android:text="Submit" />
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -5,6 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:background="@drawable/background_portrait"
     android:scaleType="fitXY"
     tools:context=".Maintenance">
@@ -26,7 +28,6 @@
             android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:alpha="0.8"
-            android:background="@drawable/rounded_corners_grey"
             android:dividerHeight="5dp" />
 
         <LinearLayout

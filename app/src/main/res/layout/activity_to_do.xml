@@ -27,7 +27,6 @@
             android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:alpha="0.8"
-            android:background="@drawable/rounded_corners_grey"
             android:dividerHeight="5dp" />
 
         <TextView
@@ -172,7 +171,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:background="@drawable/rounded_corners_grey"
+            android:background="@drawable/rounded_corners_orange_grey"
             android:onClick="addToDoClicked"
             android:text="Add To Do"
             android:textAlignment="center"

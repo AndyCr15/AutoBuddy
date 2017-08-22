@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -42,6 +43,8 @@ public class PartsLog extends AppCompatActivity {
     TextView fluidMiles;
     TextView fluidDate;
 
+    View bikeDetails;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +73,7 @@ public class PartsLog extends AppCompatActivity {
         fluidMiles = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.fluidMiles);
         fluidDate = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.fluidDate);
 
+        bikeDetails = findViewById(R.id.bikeDetails);
 
         bikeTitle.setText(bikes.get(activeBike).toString());
 
@@ -144,8 +148,10 @@ public class PartsLog extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             PartsLog.main.setBackground(drawablePic);
+            bikeDetails.setBackground(getResources().getDrawable(R.drawable.rounded_corners));
         } else {
             PartsLog.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            bikeDetails.setBackground(null);
         }
     }
 

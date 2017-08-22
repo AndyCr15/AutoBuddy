@@ -92,7 +92,7 @@ public class Bike {
         this.MOTwarned = MOTwarned;
         this.serviceWarned = serviceWarned;
         this.taxDue = taxDue;
-        // no bikeCount increment as this is only used by loading bikes, which restores the old bikeCount anyway
+        bikeCount = bikeId + 1;
     }
 
     public Bike(String make, String model, String year) {

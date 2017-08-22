@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.androidandyuk.autobuddy.MainActivity;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
@@ -30,12 +29,6 @@ public class SplashScreen extends Activity {
         mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
-
-        // code that takes time
-
-//        loadBikes();
-//        loadFuels();
-//        loadLogs();
 
     }
 

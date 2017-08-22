@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_garage"
+            android:icon="@drawable/car"
+            android:title="Garage" />
+        <item
+            android:id="@+id/nav_maint"
+            android:icon="@drawable/maint"
+            android:title="Maintenance" />
+        <item
+            android:id="@+id/nav_fuel"
+            android:icon="@drawable/fuel"
+            android:title="Fuelling" />
+        <item
+            android:id="@+id/nav_todo"
+            android:icon="@drawable/check"
+            android:title="To Do List" />
+        <item
+            android:id="@+id/nav_parts"
+            android:icon="@drawable/spark"
+            android:title="Parts Log" />
+        <item
+            android:id="@+id/nav_reports"
+            android:icon="@drawable/list"
+            android:title="Annual Reports" />
+    </group>
+
+    <item android:title="Locations">
+        <menu>
+            <item
+                android:id="@+id/nav_favs"
+                android:icon="@drawable/heart"
+                android:title="Favourites" />
+            <item
+                android:id="@+id/nav_track"
+                android:icon="@drawable/flag"
+                android:title="Race Tracks" />
+            <item
+                android:id="@+id/nav_biker"
+                android:icon="@drawable/bike"
+                android:title="Biker Hot Spots" />
+            <item
+                android:id="@+id/nav_shows"
+                android:icon="@drawable/car"
+                android:title="Auto Shows" />
+            <item
+                android:id="@+id/nav_traffic"
+                android:icon="@drawable/cone"
+                android:title="Traffic" />
+        </menu>
+    </item>
+
+    <item android:title="Settings">
+        <menu>
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/settings"
+                android:title="Settings" />
+            <item
+                android:id="@+id/nav_delete"
+                android:icon="@drawable/bin"
+                android:title="Delete Vehicle" />
+            <item
+                android:id="@+id/nav_backup"
+                android:icon="@drawable/disc"
+                android:title="Backup" />
+            <item
+                android:id="@+id/nav_restore"
+                android:icon="@drawable/load"
+                android:title="Restore" />
+        </menu>
+    </item>
+</menu>

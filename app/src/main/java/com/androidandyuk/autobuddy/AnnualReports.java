@@ -98,77 +98,81 @@ public class AnnualReports extends AppCompatActivity {
     }
 
     public void loadFuelReports() {
-        if (bikes.get(activeBike).fuelings.size() > 0) {
-            fuelReports.clear();
+        if (activeBike >= 0) {
+            if (bikes.get(activeBike).fuelings.size() > 0) {
+                fuelReports.clear();
 
-            numberOfYears = countFuelYears();
+                numberOfYears = countFuelYears();
 
-            // find the latest year so we can work back from it
-            String str[] = bikes.get(activeBike).fuelings.get(0).date.split("/");
-            int currentYear = Integer.parseInt(str[2]);
-            int i = 0;
-            // make the first item, for current year
-            fuelReports.add(new AnnualDetails(currentYear, 0, 0d, 0d, 0d));
-            Log.i("FuelReportSize", "" + fuelReports.size());
-            for (fuellingDetails thisFuel : bikes.get(activeBike).fuelings) {
-                Log.i("i ", "" + i);
-                // check what year this fuel happened in
-                String thisStr[] = thisFuel.date.split("/");
-                int thisYear = Integer.parseInt(thisStr[2]);
-                if (thisYear == currentYear) {
-                    // in same year, so add figures on
-                    fuelReports.get(i).afCount++;
-                    fuelReports.get(i).afCost += thisFuel.getPrice() * thisFuel.getLitres();
-                    fuelReports.get(i).afMiles += thisFuel.getMiles();
-                    fuelReports.get(i).afLitres += thisFuel.getLitres();
-                } else {
-                    // must be a new year, make new addition and decrease current year
-                    currentYear = thisYear;
-                    AnnualDetails newYear = new AnnualDetails(thisYear, 1, (thisFuel.getPrice() * thisFuel.getLitres()), thisFuel.getMiles(), thisFuel.getLitres());
-                    fuelReports.add(newYear);
-                    i++;
+                // find the latest year so we can work back from it
+                String str[] = bikes.get(activeBike).fuelings.get(0).date.split("/");
+                int currentYear = Integer.parseInt(str[2]);
+                int i = 0;
+                // make the first item, for current year
+                fuelReports.add(new AnnualDetails(currentYear, 0, 0d, 0d, 0d));
+                Log.i("FuelReportSize", "" + fuelReports.size());
+                for (fuellingDetails thisFuel : bikes.get(activeBike).fuelings) {
+                    Log.i("i ", "" + i);
+                    // check what year this fuel happened in
+                    String thisStr[] = thisFuel.date.split("/");
+                    int thisYear = Integer.parseInt(thisStr[2]);
+                    if (thisYear == currentYear) {
+                        // in same year, so add figures on
+                        fuelReports.get(i).afCount++;
+                        fuelReports.get(i).afCost += thisFuel.getPrice() * thisFuel.getLitres();
+                        fuelReports.get(i).afMiles += thisFuel.getMiles();
+                        fuelReports.get(i).afLitres += thisFuel.getLitres();
+                    } else {
+                        // must be a new year, make new addition and decrease current year
+                        currentYear = thisYear;
+                        AnnualDetails newYear = new AnnualDetails(thisYear, 1, (thisFuel.getPrice() * thisFuel.getLitres()), thisFuel.getMiles(), thisFuel.getLitres());
+                        fuelReports.add(newYear);
+                        i++;
+                    }
                 }
+                Log.i("FuelReportSize", "" + fuelReports.size());
+                initiateList();
+            } else {
+                Toast.makeText(this, "No Fuel Logs", Toast.LENGTH_SHORT).show();
             }
-            Log.i("FuelReportSize", "" + fuelReports.size());
-            initiateList();
-        } else {
-            Toast.makeText(this, "No Fuel Logs", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void loadMaintReports() {
-        if (bikes.get(activeBike).maintenanceLogs.size() > 0) {
-            maintReports.clear();
+        if (activeBike >= 0) {
+            if (bikes.get(activeBike).maintenanceLogs.size() > 0) {
+                maintReports.clear();
 
-            numberOfYears = countMaintYears();
+                numberOfYears = countMaintYears();
 
-            // find the latest year so we can work back from it
-            String str[] = bikes.get(activeBike).maintenanceLogs.get(0).date.split("/");
-            int currentYear = Integer.parseInt(str[2]);
-            int i = 0;
-            // make the first item, for current year
-            maintReports.add(new AnnualDetails(currentYear, 0, 0d, Bike.annualMiles(bikes.get(activeBike), currentYear), 0d));
-            Log.i("MaintReportSize", "" + maintReports.size());
-            for (maintenanceLogDetails thisLog : bikes.get(activeBike).maintenanceLogs) {
-                // check what year this fuel happened in
-                String thisStr[] = thisLog.date.split("/");
-                int thisYear = Integer.parseInt(thisStr[2]);
-                if (thisYear == currentYear) {
-                    // in same year, so add figures on
-                    maintReports.get(i).afCount++;
-                    maintReports.get(i).afCost += thisLog.getPrice();
-                } else {
-                    // must be a new year, make new addition and decrease current year
-                    currentYear = thisYear;
-                    AnnualDetails newYear = new AnnualDetails(thisYear, 1, thisLog.getPrice(), Bike.annualMiles(bikes.get(activeBike), thisYear), 0d);
-                    maintReports.add(newYear);
-                    i++;
+                // find the latest year so we can work back from it
+                String str[] = bikes.get(activeBike).maintenanceLogs.get(0).date.split("/");
+                int currentYear = Integer.parseInt(str[2]);
+                int i = 0;
+                // make the first item, for current year
+                maintReports.add(new AnnualDetails(currentYear, 0, 0d, Bike.annualMiles(bikes.get(activeBike), currentYear), 0d));
+                Log.i("MaintReportSize", "" + maintReports.size());
+                for (maintenanceLogDetails thisLog : bikes.get(activeBike).maintenanceLogs) {
+                    // check what year this fuel happened in
+                    String thisStr[] = thisLog.date.split("/");
+                    int thisYear = Integer.parseInt(thisStr[2]);
+                    if (thisYear == currentYear) {
+                        // in same year, so add figures on
+                        maintReports.get(i).afCount++;
+                        maintReports.get(i).afCost += thisLog.getPrice();
+                    } else {
+                        // must be a new year, make new addition and decrease current year
+                        currentYear = thisYear;
+                        AnnualDetails newYear = new AnnualDetails(thisYear, 1, thisLog.getPrice(), Bike.annualMiles(bikes.get(activeBike), thisYear), 0d);
+                        maintReports.add(newYear);
+                        i++;
+                    }
                 }
+                Log.i("MaintReportSize", "" + maintReports.size());
+                initiateList();
+            } else {
+                Toast.makeText(this, "No Maintenance Logs", Toast.LENGTH_SHORT).show();
             }
-            Log.i("MaintReportSize", "" + maintReports.size());
-            initiateList();
-        } else {
-            Toast.makeText(this, "No Maintenance Logs", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -365,6 +369,7 @@ public class AnnualReports extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             AnnualReports.main.setBackground(drawablePic);
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
         } else {
             AnnualReports.main.setBackgroundColor(getResources().getColor(R.color.background));
         }

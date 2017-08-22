@@ -39,6 +39,8 @@ public class Favourites extends AppCompatActivity {
 
     public static RelativeLayout main;
 
+    ListView listView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +55,7 @@ public class Favourites extends AppCompatActivity {
 
         setContentView(com.androidandyuk.autobuddy.R.layout.activity_favourites);
 
-        ListView listView = (ListView) findViewById(com.androidandyuk.autobuddy.R.id.favsList);
+        listView = (ListView) findViewById(com.androidandyuk.autobuddy.R.id.favsList);
 
         Button seeFavsMap = (Button) findViewById(com.androidandyuk.autobuddy.R.id.seeFavsMap);
 
@@ -117,6 +119,7 @@ public class Favourites extends AppCompatActivity {
 
         });
 
+        checkBackground();
     }
 
     public void addFav(View view) {
@@ -187,13 +190,16 @@ public class Favourites extends AppCompatActivity {
     }
 
     public void checkBackground() {
+        Log.i("backgroundsWanted","" + backgroundsWanted);
         main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
         if(backgroundsWanted){
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Favourites.main.setBackground(drawablePic);
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
         } else {
             Favourites.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            listView.setBackground(null);
         }
     }
 

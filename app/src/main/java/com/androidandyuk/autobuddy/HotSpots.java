@@ -3,6 +3,7 @@ package com.androidandyuk.autobuddy;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,10 +19,20 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
+import static com.androidandyuk.autobuddy.MainActivity.jsonLocation;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
 import static com.androidandyuk.autobuddy.MainActivity.oneDecimal;
 import static com.androidandyuk.autobuddy.MainActivity.sharedPreferences;
@@ -32,6 +43,8 @@ public class HotSpots extends AppCompatActivity {
 
     public static RelativeLayout main;
 
+    ListView listView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,12 +54,9 @@ public class HotSpots extends AppCompatActivity {
         sharedPreferences = this.getSharedPreferences("com.androidandyuk.autobuddy", Context.MODE_PRIVATE);
 
         setContentView(R.layout.activity_hot_spots);
-        ListView listView = (ListView) findViewById(R.id.favsList);
+        listView = (ListView) findViewById(R.id.favsList);
 
-        if (hotspotLocations.size() == 0) {
-            Log.i("Favourites", "Initializing Locations");
-            initialiseLocations();
-        }
+        new MyAsyncTaskgetNews().execute(jsonLocation + "hotspots.json");
 
         myAdapter = new MyLocationAdapter(hotspotLocations);
         listView.setAdapter(myAdapter);
@@ -61,11 +71,11 @@ public class HotSpots extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), LocationInfoActivity.class);
                 intent.putExtra("placeNumber", i);
                 intent.putExtra("Type", "Hot");
-
                 startActivity(intent);
             }
         });
 
+        checkBackground();
 
     }
 
@@ -123,7 +133,7 @@ public class HotSpots extends AppCompatActivity {
 
             final markedLocation s = locationDataAdapter.get(position);
 
-            TextView milesKM = (TextView)myView.findViewById(R.id.milesKM);
+            TextView milesKM = (TextView) myView.findViewById(R.id.milesKM);
             milesKM.setText(milesSetting);
 
             TextView locationListDistance = (TextView) myView.findViewById(R.id.locationListDistance);
@@ -138,14 +148,101 @@ public class HotSpots extends AppCompatActivity {
     }
 
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
-        if(backgroundsWanted){
-            int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
+        main = (RelativeLayout) findViewById(R.id.main);
+        if (backgroundsWanted) {
+            int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             HotSpots.main.setBackground(drawablePic);
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
         } else {
-            HotSpots.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            HotSpots.main.setBackgroundColor(getResources().getColor(R.color.background));
         }
+    }
+
+    // get news from server
+    public class MyAsyncTaskgetNews extends AsyncTask<String, String, String> {
+        @Override
+        protected void onPreExecute() {
+            //before works
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                Log.i("HotSpots", "doInBackground");
+                hotspotLocations.clear();
+                String NewsData;
+                //define the url we have to connect with
+                URL url = new URL(params[0]);
+                //make connect with url and send request
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                //waiting for 7000ms for response
+                urlConnection.setConnectTimeout(15000);//set timeout to 15 seconds
+
+                try {
+                    //getting the response data
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                    //convert the stream to string
+                    NewsData = ConvertInputToStringNoChange(in);
+                    //send to display data
+                    publishProgress(NewsData);
+                } finally {
+                    //end connection
+                    urlConnection.disconnect();
+                }
+
+            } catch (Exception ex) {
+                Log.i("HotSpots", "doInBackground Exception");
+            }
+            return null;
+        }
+
+        protected void onProgressUpdate(String... progress) {
+            try {
+                Log.i("HotSpots", "Getting JSON");
+                JSONArray json = new JSONArray(progress[0]);
+                Log.i("JSON size", "" + json.length());
+
+                for (int i = 0; i < json.length(); i++) {
+                    JSONObject thisShow = json.getJSONObject(i);
+                    String name = thisShow.getString("name");
+                    LatLng location = new LatLng(thisShow.getDouble("lat"), thisShow.getDouble("lon"));
+                    String comment = thisShow.getString("comment");
+                    hotspotLocations.add(new markedLocation(name, location, comment));
+                    Log.i("Adding HotSpot ", name);
+                }
+            } catch (Exception ex) {
+                Log.i("JSON failed", "" + ex);
+            }
+        }
+
+        protected void onPostExecute(String result2) {
+            sortMyList();
+        }
+
+
+    }
+
+    // this method convert any stream to string
+    public static String ConvertInputToStringNoChange(InputStream inputStream) {
+
+        BufferedReader bureader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        String linereultcal = "";
+
+        try {
+            while ((line = bureader.readLine()) != null) {
+
+                linereultcal += line;
+
+            }
+            inputStream.close();
+
+
+        } catch (Exception ex) {
+        }
+
+        return linereultcal;
     }
 
     public void initialiseLocations() {
@@ -194,6 +291,6 @@ public class HotSpots extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.i("Hot Spots","On Stop");
+        Log.i("Hot Spots", "On Stop");
     }
 }

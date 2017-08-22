@@ -1,5 +1,6 @@
 package com.androidandyuk.autobuddy;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -11,6 +12,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -66,6 +68,8 @@ public class Settings extends AppCompatActivity {
     Spinner currencySpinner;
     Spinner milesSpinner;
 
+    public static ImageView shield;
+
     View getDetails;
     public static String tag;
     public static String details;
@@ -117,6 +121,8 @@ public class Settings extends AppCompatActivity {
 
         backgroundsWantedSW = (Switch) findViewById(com.androidandyuk.autobuddy.R.id.backgroundsWanted);
         backgroundsWantedSW.setChecked(backgroundsWanted);
+
+        shield = (ImageView) findViewById(R.id.shield);
     }
 
     public void getDetailsClicked(View view) {
@@ -162,6 +168,7 @@ public class Settings extends AppCompatActivity {
         Log.i("Get Details", hint);
         getDetails = findViewById(R.id.getDetails);
         getDetails.setVisibility(View.VISIBLE);
+        shield.setVisibility(View.VISIBLE);
         final EditText thisET = (EditText) findViewById(R.id.getDetailsText);
         thisET.setHint(hint);
 
@@ -177,6 +184,7 @@ public class Settings extends AppCompatActivity {
                     details = thisET.getText().toString();
                     Log.i("Details", details);
                     getDetails.setVisibility(View.INVISIBLE);
+                    shield.setVisibility(View.INVISIBLE);
                     thisET.setText(null);
                     checkDetails();
                     return true;
@@ -193,44 +201,27 @@ public class Settings extends AppCompatActivity {
         details = thisET.getText().toString();
         Log.i("Details", details);
         getDetails.setVisibility(View.INVISIBLE);
+        shield.setVisibility(View.INVISIBLE);
         thisET.setText(null);
         checkDetails();
     }
 
-//    public void getDetailsMins(String hint) {
-//        Log.i("Get Details", hint);
-////        final String[] detail = new String[1];
-//        final View getDetails = findViewById(getDetails);
-//        getDetails.setVisibility(View.VISIBLE);
-//        final EditText thisET = (EditText) findViewById(com.androidandyuk.autobuddy.R.id.getDetailsText);
-//        thisET.setHint(hint);
-//
-//        thisET.setFocusableInTouchMode(true);
-//        thisET.requestFocus();
-//
-//        thisET.setOnKeyListener(new View.OnKeyListener() {
-//            public boolean onKey(View v, int keyCode, KeyEvent event) {
-//                // If the event is a key-down event on the "enter" button
-//                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-//                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
-//                    // Perform action on key press
-//                    String details = thisET.getText().toString().toUpperCase();
-//                    Log.i("Details", details);
-//                    getDetails.setVisibility(View.INVISIBLE);
-//
-//                    locationUpdatesTime = Integer.parseInt(details) * 60000;
-//                    locationUpdatesTimeTV = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.minutesBetween);
-//                    locationUpdatesTimeTV.setText(details);
-//                    ed.putInt("locationUpdatesTime", Integer.parseInt(details)).apply();
-//
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
-//    }
+    public void shieldClicked(View view){
+        if(getDetails.isShown()){
+            getDetails.setVisibility(View.INVISIBLE);
+            shield.setVisibility(View.INVISIBLE);
+        }
+    }
 
-    public void exportDB(View view) {
+    public void exportDBPressed(View view){
+        exportDB();
+    }
+
+    public void importDBPressed(View view){
+        importDB();
+    }
+
+    public static void exportDB() {
         Log.i("exportDB", "Starting");
         File sd = Environment.getExternalStorageDirectory();
         File data = Environment.getDataDirectory();
@@ -255,20 +246,21 @@ public class Settings extends AppCompatActivity {
         String backupDBPath = "AutoBuddy/Vehicles.db";
         File currentDB = new File(data, currentDBPath);
         File backupDB = new File(sd, backupDBPath);
+        Context context = App.getContext();
         try {
             source = new FileInputStream(currentDB).getChannel();
             destination = new FileOutputStream(backupDB).getChannel();
             destination.transferFrom(source, 0, source.size());
             source.close();
             destination.close();
-            Toast.makeText(this, "DB Exported!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "DB Exported!", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Exported Failed!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Exported Failed!", Toast.LENGTH_LONG).show();
         }
     }
 
-    public void importDB(View view) {
+    public static void importDB() {
         Log.i("ImportDB", "Started");
         try {
             String DB_PATH = "/data/data/com.androidandyuk.autobuddy/databases/Vehicles";
@@ -306,7 +298,8 @@ public class Settings extends AppCompatActivity {
         Fuelling.loadFuels();
         Maintenance.loadLogs();
         ToDo.loadToDos();
-        Toast.makeText(this, "Data Imported. Close app and reopen", Toast.LENGTH_LONG).show();
+        Context context = App.getContext();
+        Toast.makeText(context, "Data Imported. Close app and reopen", Toast.LENGTH_LONG).show();
         if (bikes.size() > 0) {
             activeBike = 0;
         }
@@ -529,6 +522,7 @@ public class Settings extends AppCompatActivity {
             getDetails = findViewById(R.id.getDetails);
             if (getDetails.isShown()) {
                 getDetails.setVisibility(View.INVISIBLE);
+                shield.setVisibility(View.INVISIBLE);
             } else {
                 finish();
                 return true;

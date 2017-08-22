@@ -40,7 +40,8 @@
             android:layout_weight="0"
             android:background="@drawable/rounded_corners"
             android:onClick="viewHotSpots"
-            android:text="View Hot Spots" />
+            android:text="View Hot Spots"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 

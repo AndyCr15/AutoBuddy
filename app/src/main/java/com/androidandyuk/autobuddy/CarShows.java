@@ -40,6 +40,7 @@ import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
 import static com.androidandyuk.autobuddy.MainActivity.ed;
 import static com.androidandyuk.autobuddy.MainActivity.incBikeEvents;
 import static com.androidandyuk.autobuddy.MainActivity.incCarEvents;
+import static com.androidandyuk.autobuddy.MainActivity.jsonLocation;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
 import static com.androidandyuk.autobuddy.MainActivity.oneDecimal;
 import static com.androidandyuk.autobuddy.MainActivity.sdf;
@@ -49,9 +50,13 @@ public class CarShows extends AppCompatActivity {
     static List<markedLocation> carShows = new ArrayList<>();
     static MyLocationAdapter myAdapter;
 
+    boolean updatedRecently = false;
+
     private FirebaseAnalytics mFirebaseAnalytics;
 
     public static RelativeLayout main;
+
+    ListView listView;
 
     String carUrl;
     String bikeUrl;
@@ -59,13 +64,13 @@ public class CarShows extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.androidandyuk.autobuddy.R.layout.activity_car_shows);
+        setContentView(R.layout.activity_car_shows);
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         Log.i("Car Shows", "onCreate");
 
-        ListView listView = (ListView) findViewById(com.androidandyuk.autobuddy.R.id.listShows);
+        listView = (ListView) findViewById(R.id.listShows);
 
         myAdapter = new MyLocationAdapter(carShows);
 
@@ -86,18 +91,17 @@ public class CarShows extends AppCompatActivity {
         });
 
         // the location of the shows xml file
-        carUrl = "http://www.lanarchy.co.uk/carshows.json";
-        bikeUrl = "http://www.lanarchy.co.uk/bikeshows.json";
+        carUrl = jsonLocation + "carshows.json";
+        bikeUrl = jsonLocation + "bikeshows.json";
 
-        // check if shows are already present, if not, load shows
-        if (carShows.size() == 0) {
+        // check if shows have been loaded already
+        if (updatedRecently) {
             loadShows();
-        }
-
-        // check if loading made a difference. If not, parse the xml
-        if (carShows.size() == 0) {
+        } else {
             updateShows();
         }
+
+        checkBackground();
     }
 
     public void updateShowsButton(View view) {
@@ -105,6 +109,7 @@ public class CarShows extends AppCompatActivity {
     }
 
     public void updateShows() {
+        updatedRecently = true;
         carShows.clear();
         // get the data
         if(incCarEvents) {
@@ -117,13 +122,14 @@ public class CarShows extends AppCompatActivity {
     }
 
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
+        main = (RelativeLayout) findViewById(R.id.main);
         if(backgroundsWanted){
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             CarShows.main.setBackground(drawablePic);
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
         } else {
-            CarShows.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            CarShows.main.setBackgroundColor(getResources().getColor(R.color.background));
         }
     }
 
@@ -240,17 +246,17 @@ public class CarShows extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater mInflater = getLayoutInflater();
-            View myView = mInflater.inflate(com.androidandyuk.autobuddy.R.layout.location_listview, null);
+            View myView = mInflater.inflate(R.layout.location_listview, null);
 
             final markedLocation s = locationDataAdapter.get(position);
 
-            TextView milesKM = (TextView)myView.findViewById(com.androidandyuk.autobuddy.R.id.milesKM);
+            TextView milesKM = (TextView)myView.findViewById(R.id.milesKM);
             milesKM.setText(milesSetting);
 
-            TextView locationListDistance = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.locationListDistance);
+            TextView locationListDistance = (TextView) myView.findViewById(R.id.locationListDistance);
             locationListDistance.setText(oneDecimal.format(s.distance));
 
-            TextView locationListName = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.locationListName);
+            TextView locationListName = (TextView) myView.findViewById(R.id.locationListName);
             locationListName.setText(s.name);
 
             return myView;

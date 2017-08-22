@@ -2,6 +2,7 @@ package com.androidandyuk.autobuddy;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,11 +19,21 @@ import android.widget.TextView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
+import static com.androidandyuk.autobuddy.MainActivity.jsonLocation;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
 import static com.androidandyuk.autobuddy.MainActivity.oneDecimal;
 
@@ -33,17 +44,18 @@ public class RaceTracks extends AppCompatActivity {
     private FirebaseAnalytics mFirebaseAnalytics;
 
     public static RelativeLayout main;
+    ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.androidandyuk.autobuddy.R.layout.activity_race_tracks);
+        setContentView(R.layout.activity_race_tracks);
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         Log.i("Race Tracks", "onCreate");
 
-        ListView listView = (ListView) findViewById(com.androidandyuk.autobuddy.R.id.listTracks);
+        listView = (ListView) findViewById(R.id.listTracks);
 
         myAdapter = new MyLocationAdapter(trackLocations);
 
@@ -63,7 +75,9 @@ public class RaceTracks extends AppCompatActivity {
 
         });
 
-        initialiseTracks();
+        new MyAsyncTaskgetNews().execute(jsonLocation + "racetracks.json");
+
+//        initialiseTracks();
     }
 
     public void viewTracks(View view) {
@@ -109,17 +123,17 @@ public class RaceTracks extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater mInflater = getLayoutInflater();
-            View myView = mInflater.inflate(com.androidandyuk.autobuddy.R.layout.location_listview, null);
+            View myView = mInflater.inflate(R.layout.location_listview, null);
 
             final markedLocation s = locationDataAdapter.get(position);
 
-            TextView milesKM = (TextView)myView.findViewById(com.androidandyuk.autobuddy.R.id.milesKM);
+            TextView milesKM = (TextView)myView.findViewById(R.id.milesKM);
             milesKM.setText(milesSetting);
 
-            TextView locationListDistance = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.locationListDistance);
+            TextView locationListDistance = (TextView) myView.findViewById(R.id.locationListDistance);
             locationListDistance.setText(oneDecimal.format(s.distance));
 
-            TextView locationListName = (TextView) myView.findViewById(com.androidandyuk.autobuddy.R.id.locationListName);
+            TextView locationListName = (TextView) myView.findViewById(R.id.locationListName);
             locationListName.setText(s.name);
 
             return myView;
@@ -128,14 +142,100 @@ public class RaceTracks extends AppCompatActivity {
     }
 
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
+        main = (RelativeLayout) findViewById(R.id.main);
         if(backgroundsWanted){
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             RaceTracks.main.setBackground(drawablePic);
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
         } else {
-            RaceTracks.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            RaceTracks.main.setBackgroundColor(getResources().getColor(R.color.background));
+            listView.setBackground(null);
         }
+    }
+
+    // get news from server
+    public class MyAsyncTaskgetNews extends AsyncTask<String, String, String> {
+        @Override
+        protected void onPreExecute() {
+            //before works
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                Log.i("RaceTracks", "doInBackground");
+                trackLocations.clear();
+                String NewsData;
+                //define the url we have to connect with
+                URL url = new URL(params[0]);
+                //make connect with url and send request
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                //waiting for 7000ms for response
+                urlConnection.setConnectTimeout(15000);//set timeout to 15 seconds
+
+                try {
+                    //getting the response data
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                    //convert the stream to string
+                    NewsData = ConvertInputToStringNoChange(in);
+                    //send to display data
+                    publishProgress(NewsData);
+                } finally {
+                    //end connection
+                    urlConnection.disconnect();
+                }
+
+            } catch (Exception ex) {
+                Log.i("RaceTracks", "doInBackground Exception");
+            }
+            return null;
+        }
+
+        protected void onProgressUpdate(String... progress) {
+            try {
+                Log.i("RaceTracks", "Getting JSON");
+                JSONArray json = new JSONArray(progress[0]);
+                Log.i("JSON size", "" + json.length());
+
+                for (int i = 0; i < json.length(); i++) {
+                    JSONObject thisShow = json.getJSONObject(i);
+                    String name = thisShow.getString("name");
+                    LatLng location = new LatLng(thisShow.getDouble("lat"), thisShow.getDouble("lon"));
+                    String comment = thisShow.getString("comment");
+                    trackLocations.add(new markedLocation(name, location, comment));
+                    Log.i("Adding HotSpot ", name);
+                }
+            } catch (Exception ex) {
+                Log.i("JSON failed", "" + ex);
+            }
+        }
+
+        protected void onPostExecute(String result2) {
+            sortMyList();
+        }
+    }
+
+    // this method convert any stream to string
+    public static String ConvertInputToStringNoChange(InputStream inputStream) {
+
+        BufferedReader bureader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        String linereultcal = "";
+
+        try {
+            while ((line = bureader.readLine()) != null) {
+
+                linereultcal += line;
+
+            }
+            inputStream.close();
+
+
+        } catch (Exception ex) {
+        }
+
+        return linereultcal;
     }
 
     public static void initialiseTracks() {

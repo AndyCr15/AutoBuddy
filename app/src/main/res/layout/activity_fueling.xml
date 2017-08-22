@@ -26,7 +26,6 @@
             android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:alpha="0.8"
-            android:background="@drawable/rounded_corners_grey"
             android:dividerHeight="5dp" />
 
         <TextView
@@ -69,6 +68,13 @@
     </LinearLayout>
 
 
+    <ImageView
+        android:id="@+id/shield"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="shieldClicked"
+        android:visibility="visible" />
+
     <LinearLayout
         android:id="@+id/fuelSummary"
         android:layout_width="200dp"
@@ -103,13 +109,6 @@
             android:textStyle="bold" />
 
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/shield"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:onClick="shieldClicked"
-        android:visibility="visible" />
 
     <LinearLayout
         android:id="@+id/fuelingDetailsLayout"
@@ -171,8 +170,8 @@
                 android:layout_margin="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners_grey"
-                android:hint="Enter Mileage"
-                android:inputType="number"
+                android:hint="Odometer Reading"
+                android:inputType="numberDecimal"
                 android:textAlignment="center"
                 android:textSize="18sp" />
 
@@ -193,7 +192,7 @@
                 android:layout_margin="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners_grey"
-                android:hint="Or enter miles"
+                android:hint="Trip Counter"
                 android:inputType="numberDecimal"
                 android:textAlignment="center"
                 android:textSize="18sp" />
@@ -224,7 +223,7 @@
                 android:layout_margin="8dp"
                 android:layout_weight="2"
                 android:background="@drawable/rounded_corners_grey"
-                android:hint="Price"
+                android:hint="Price per Ltr"
                 android:inputType="numberDecimal"
                 android:textAlignment="center"
                 android:textSize="18sp" />
@@ -260,7 +259,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:background="@drawable/rounded_corners_grey"
+            android:background="@drawable/rounded_corners_orange_grey"
             android:onClick="addFuelingClicked"
             android:text="Add fueling"
             android:textAlignment="center"

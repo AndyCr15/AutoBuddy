@@ -51,6 +51,7 @@ import static com.androidandyuk.autobuddy.MainActivity.oneDecimal;
 import static com.androidandyuk.autobuddy.MainActivity.sdf;
 import static com.androidandyuk.autobuddy.MainActivity.sharedPreferences;
 import static com.androidandyuk.autobuddy.MainActivity.vehiclesDB;
+import static com.androidandyuk.autobuddy.R.id.fuelList;
 
 public class Fuelling extends AppCompatActivity {
 
@@ -112,14 +113,10 @@ public class Fuelling extends AppCompatActivity {
         litresUsed = (EditText) findViewById(R.id.litresUsed);
         mileageText = (EditText) findViewById(R.id.mileageET);
 
-        milesDone.setHint(milesSetting + " done");
-
         Log.i("Fuelling", "Loading Fuels");
         loadFuels();
 
         initiateList();
-
-        //needed for editing a fueling
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -165,6 +162,7 @@ public class Fuelling extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 Log.i("Removing", "Log " + fuelPosition);
                                 bikes.get(activeBike).fuelings.remove(fuelPosition);
+                                saveFuels();
                                 initiateList();
                                 Toast.makeText(context, "Deleted!", Toast.LENGTH_SHORT).show();
 
@@ -275,7 +273,7 @@ public class Fuelling extends AppCompatActivity {
 
     private void initiateList() {
         Log.i("Fuelling", "Initiating List");
-        listView = (ListView) findViewById(R.id.fuelList);
+        listView = (ListView) findViewById(fuelList);
 
         Log.i("Fuelling", "Setting myAdapter");
         myAdapter = new MyFuelAdapter(bikes.get(activeBike).fuelings);
@@ -406,6 +404,8 @@ public class Fuelling extends AppCompatActivity {
 
             saveFuels();
             // clear previous entries
+            mileageText.setText(null);
+            mileageText.clearFocus();
             milesDone.setText(null);
             milesDone.clearFocus();
             petrolPrice.setText(null);
@@ -550,6 +550,7 @@ public class Fuelling extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Fuelling.main.setBackground(drawablePic);
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
         } else {
             Fuelling.main.setBackgroundColor(getResources().getColor(R.color.background));
         }
@@ -808,10 +809,6 @@ public class Fuelling extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // could be coming back from a settings change, so set these just in case they changed
-        milesDone.setHint(milesSetting + " done");
-        myAdapter.notifyDataSetChanged();
-
         checkBackground();
     }
 }

@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.DatePicker;
@@ -162,6 +163,13 @@ public class Maintenance extends AppCompatActivity {
                 setLogDate.setText(sdfDate);
             }
         };
+
+        // Check if no view has focus.  view should be whatever layout you just used
+        View thisView = this.getCurrentFocus();
+        if (thisView != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(thisView.getWindowToken(), 0);
+        }
 
     }
 
@@ -335,11 +343,11 @@ public class Maintenance extends AppCompatActivity {
 
                 // check what setting the user has, Miles or Km
                 // if Km, convert to Miles for display
-                if(milesSetting.equals("Km")){
+                if (milesSetting.equals("Km")) {
                     thisMiles = thisMiles / conversion;
                 }
 
-                maintenanceListMileage.setText(milesSetting + ":" +(oneDecimal.format(thisMiles)));
+                maintenanceListMileage.setText(milesSetting + ":" + (oneDecimal.format(thisMiles)));
 
                 TextView maintenanceListLog = (TextView) myView.findViewById(R.id.maintenanceListLog);
                 maintenanceListLog.setText(s.log);
@@ -362,10 +370,11 @@ public class Maintenance extends AppCompatActivity {
 
     public void checkBackground() {
         main = (RelativeLayout) findViewById(R.id.main);
-        if(backgroundsWanted){
-            int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
+        if (backgroundsWanted) {
+            int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Maintenance.main.setBackground(drawablePic);
+            maintList.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
         } else {
             Maintenance.main.setBackgroundColor(getResources().getColor(R.color.background));
         }
@@ -496,11 +505,11 @@ public class Maintenance extends AppCompatActivity {
 
                 vehiclesDB.execSQL("INSERT INTO '" + dbname + "' (dates, logs, costs, mileage, wasService, wasMOT, brakePads" +
                         ", brakeDiscs, frontTyre, rearTyre, oilChange, newBattery, coolantChange, sparkPlugs, airFilter, brakeFluid) VALUES ('" +
-                        ObjectSerializer.serialize(dates) + "' , '" + ObjectSerializer.serialize(logs) + "' , '" + ObjectSerializer.serialize(costs) + "' , '" + 
-                        ObjectSerializer.serialize(mileage) + "' , '" + ObjectSerializer.serialize(wasService) + "' , '" + ObjectSerializer.serialize(wasMOT) + "' , '" + 
-                        ObjectSerializer.serialize(brakePads) + "' , '" +ObjectSerializer.serialize(brakeDiscs) + "' , '" + ObjectSerializer.serialize(frontTyre) + "' , '" + 
-                        ObjectSerializer.serialize(rearTyre) + "' , '" + ObjectSerializer.serialize(oilChange) + "' , '" +ObjectSerializer.serialize(newBattery) + "' , '" + 
-                        ObjectSerializer.serialize(coolantChange) + "' , '" + ObjectSerializer.serialize(sparkPlugs) + "' , '" +ObjectSerializer.serialize(airFilter) + "' , '" + 
+                        ObjectSerializer.serialize(dates) + "' , '" + ObjectSerializer.serialize(logs) + "' , '" + ObjectSerializer.serialize(costs) + "' , '" +
+                        ObjectSerializer.serialize(mileage) + "' , '" + ObjectSerializer.serialize(wasService) + "' , '" + ObjectSerializer.serialize(wasMOT) + "' , '" +
+                        ObjectSerializer.serialize(brakePads) + "' , '" + ObjectSerializer.serialize(brakeDiscs) + "' , '" + ObjectSerializer.serialize(frontTyre) + "' , '" +
+                        ObjectSerializer.serialize(rearTyre) + "' , '" + ObjectSerializer.serialize(oilChange) + "' , '" + ObjectSerializer.serialize(newBattery) + "' , '" +
+                        ObjectSerializer.serialize(coolantChange) + "' , '" + ObjectSerializer.serialize(sparkPlugs) + "' , '" + ObjectSerializer.serialize(airFilter) + "' , '" +
                         ObjectSerializer.serialize(brakeFluid) + "')");
 
             } catch (Exception e) {
@@ -712,7 +721,7 @@ public class Maintenance extends AppCompatActivity {
             }
         }
     }
-    
+
     @Override
     public void onBackPressed() {
         // this must be empty as back is being dealt with in onKeyDown
