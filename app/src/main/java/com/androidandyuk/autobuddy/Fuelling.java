@@ -373,11 +373,10 @@ public class Fuelling extends AppCompatActivity {
             double price = Double.parseDouble(petrolPrice.getText().toString());
             double litres = Double.parseDouble(litresUsed.getText().toString());
 
-
             // check if we're adding as it was being edited
             if (itemLongPressed != null) {
                 // adding back in an edited log, so remove the old one
-                bikes.get(activeBike).fuelings.remove(itemLongPressed);
+                bikes.get(activeBike).fuelings.remove(itemLongPressedPosition);
             }
 
 
