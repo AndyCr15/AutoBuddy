@@ -24,7 +24,8 @@
             android:id="@+id/trafficListTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Title" />
+            android:text="Title"
+            android:textColor="@color/colorGrey" />
 
         <TextView
             android:id="@+id/trafficListDelay"

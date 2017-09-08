@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,9 +34,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
+import static com.androidandyuk.autobuddy.MainActivity.ed;
 import static com.androidandyuk.autobuddy.MainActivity.jsonLocation;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
 import static com.androidandyuk.autobuddy.MainActivity.oneDecimal;
+import static com.androidandyuk.autobuddy.MainActivity.sharedPreferences;
 
 public class RaceTracks extends AppCompatActivity {
     static List<markedLocation> trackLocations = new ArrayList<>();
@@ -75,9 +78,14 @@ public class RaceTracks extends AppCompatActivity {
 
         });
 
-        new MyAsyncTaskgetNews().execute(jsonLocation + "racetracks.json");
+        loadTracks();
 
-//        initialiseTracks();
+        Long lastUpdated = Long.parseLong(sharedPreferences.getString("tracksUpdated", "0"));
+        Long sinceUpdated = (System.currentTimeMillis() - lastUpdated)/1000;
+        if(trackLocations.size() == 0 || sinceUpdated > 5200000) {
+            new MyAsyncTaskgetNews().execute(jsonLocation + "racetracks.json");
+        }
+
     }
 
     public void viewTracks(View view) {
@@ -147,7 +155,7 @@ public class RaceTracks extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             RaceTracks.main.setBackground(drawablePic);
-            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             RaceTracks.main.setBackgroundColor(getResources().getColor(R.color.background));
             listView.setBackground(null);
@@ -159,6 +167,8 @@ public class RaceTracks extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             //before works
+            ImageView loading = (ImageView) findViewById(R.id.loadingShield);
+            loading.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -213,6 +223,10 @@ public class RaceTracks extends AppCompatActivity {
 
         protected void onPostExecute(String result2) {
             sortMyList();
+            ImageView loading = (ImageView) findViewById(R.id.loadingShield);
+            loading.setVisibility(View.INVISIBLE);
+            saveTracks();
+            ed.putString("tracksUpdated", Long.toString(System.currentTimeMillis())).apply();
         }
     }
 
@@ -238,31 +252,73 @@ public class RaceTracks extends AppCompatActivity {
         return linereultcal;
     }
 
-    public static void initialiseTracks() {
+    public void saveTracks() {
+        Log.i("Saving", "Tracks");
+        try {
 
-        if (RaceTracks.trackLocations.size() == 0) {
-            Log.i("Initialising Tracks", "Started");
-            RaceTracks.trackLocations.add(new markedLocation("Brands Hatch", new LatLng(51.3598711, 0.2586481), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Silverstone", new LatLng(52.0733006, -1.0168521), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Snetterton", new LatLng(52.4636482, 0.9436173), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Oulton Park", new LatLng(53.178469, -2.6189947), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Donington Park", new LatLng(52.8305468, -1.381029), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Anglesey", new LatLng(53.191994, -4.5038327), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Bedford Autodrome", new LatLng(52.2211337, -0.4819822), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Cadwell Park", new LatLng(53.3108261, -0.0737291), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Croft", new LatLng(54.4554809, -1.5580811), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Lydden Hill", new LatLng(51.1771493, 1.1987867), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Mallory Park", new LatLng(52.6006262, -1.3344846), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Rockingham", new LatLng(52.5156871, -0.6600846), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Thruxton", new LatLng(51.185835, -1.55265), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Knock Hill", new LatLng(56.1313905, -3.5111837), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Pembrey Race Circuit", new LatLng(51.7052918, -4.3258864), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Castle Combe", new LatLng(51.4935115, -2.2200441), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Goodwood", new LatLng(50.859426, -0.753909), ""));
-            RaceTracks.trackLocations.add(new markedLocation("Santa Pod", new LatLng(52.23485, -0.6022797), ""));
+            ArrayList<String> trName = new ArrayList<>();
+            ArrayList<String> trComment = new ArrayList<>();
+            ArrayList<String> trLat = new ArrayList<>();
+            ArrayList<String> trLon = new ArrayList<>();
+
+            for (markedLocation thisTrack : trackLocations) {
+
+                trName.add(thisTrack.name);
+                trComment.add(thisTrack.comment);
+                trLat.add(Double.toString(thisTrack.location.latitude));
+                trLon.add(Double.toString(thisTrack.location.longitude));
+
+            }
+
+            Log.i("Saving Tracks", "Size :" + trName.size());
+            ed.putString("trName", ObjectSerializer.serialize(trName)).apply();
+            ed.putString("trComment", ObjectSerializer.serialize(trComment)).apply();
+            ed.putString("trLat", ObjectSerializer.serialize(trLat)).apply();
+            ed.putString("trLon", ObjectSerializer.serialize(trLon)).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("Adding Shows", "Failed attempt");
         }
     }
 
+    public static void loadTracks() {
+
+        trackLocations.clear();
+
+        Log.i("Loading", "Tracks");
+
+        ArrayList<String> trName = new ArrayList<>();
+        ArrayList<String> trComment = new ArrayList<>();
+        ArrayList<String> trLat = new ArrayList<>();
+        ArrayList<String> trLon = new ArrayList<>();
+        
+        try {
+
+            trName = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("trName", ObjectSerializer.serialize(new ArrayList<String>())));
+            trComment = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("trComment", ObjectSerializer.serialize(new ArrayList<String>())));
+            trLat = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("trLat", ObjectSerializer.serialize(new ArrayList<String>())));
+            trLon = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("trLon", ObjectSerializer.serialize(new ArrayList<String>())));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("Loading Tracks", "Failed attempt");
+        }
+
+        if (trName.size() > 0 && trComment.size() > 0 && trLat.size() > 0) {
+            // we've checked there is some info
+            if (trName.size() == trComment.size() && trComment.size() == trLat.size()) {
+                // we've checked each item has the same amount of info, nothing is missing
+                for (int x = 0; x < trName.size(); x++) {
+                    Double lat = Double.parseDouble(trLat.get(x));
+                    Double lon = Double.parseDouble(trLon.get(x));
+                    LatLng thisLocation = new LatLng(lat, lon);
+                    trackLocations.add(new markedLocation(trName.get(x), thisLocation, trComment.get(x)));
+                }
+            }
+        }
+    }
+    
+    
     @Override
     public void onBackPressed() {
         // this must be empty as back is being dealt with in onKeyDown

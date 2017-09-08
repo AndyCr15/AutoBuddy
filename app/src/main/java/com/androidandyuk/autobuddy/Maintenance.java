@@ -374,7 +374,7 @@ public class Maintenance extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Maintenance.main.setBackground(drawablePic);
-            maintList.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
+            maintList.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             Maintenance.main.setBackgroundColor(getResources().getColor(R.color.background));
         }

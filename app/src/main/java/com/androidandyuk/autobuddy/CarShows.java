@@ -127,7 +127,7 @@ public class CarShows extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             CarShows.main.setBackground(drawablePic);
-            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             CarShows.main.setBackgroundColor(getResources().getColor(R.color.background));
         }

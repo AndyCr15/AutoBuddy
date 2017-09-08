@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.androidandyuk.autobuddy.MainActivity.conversion;
+import static com.androidandyuk.autobuddy.MainActivity.geocoder;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
 import static com.androidandyuk.autobuddy.MainActivity.user;
 
@@ -52,7 +53,7 @@ public class markedLocation implements Comparable<markedLocation> {
         this.name = name;
         this.location = location;
         this.comment = comment;
-        this.address = getAddress();
+        this.address = getAddress(location);
     }
 
     public double getDistance(markedLocation o) {
@@ -79,14 +80,14 @@ public class markedLocation implements Comparable<markedLocation> {
         return 0;
     }
 
-    public String getAddress() {
+    public String getAddress(LatLng location) {
         String strAdd = "";
         Context context = App.getContext();
 
-        double LATITUDE = this.location.latitude;
-        double LONGITUDE = this.location.longitude;
+        double LATITUDE = location.latitude;
+        double LONGITUDE = location.longitude;
 
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
             if (addresses != null) {
@@ -103,7 +104,7 @@ public class markedLocation implements Comparable<markedLocation> {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.i("Current loction address", "Canont get Address!");
+            Log.i("Current loation address", "Cannot get Address!");
         }
         return strAdd;
     }

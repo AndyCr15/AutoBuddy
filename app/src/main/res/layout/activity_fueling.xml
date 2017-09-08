@@ -26,7 +26,8 @@
             android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:alpha="0.8"
-            android:dividerHeight="5dp" />
+            android:dividerHeight="5dp"
+            android:paddingRight="4dp" />
 
         <TextView
             android:id="@+id/instructions"
@@ -55,25 +56,43 @@
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
             android:layout_weight="0"
-            android:background="@drawable/rounded_corners_grey"
+            android:background="@drawable/rounded_corners_drkgrey_orange"
             android:paddingBottom="5dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="5dp"
             android:text="Ave MPG will be here"
             android:textAlignment="center"
+            android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold" />
 
     </LinearLayout>
 
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:onClick="showFueling"
+        ads:elevation="12dp"
+        ads:fabSize="normal"
+        app:srcCompat="@drawable/plus" />
+
     <ImageView
         android:id="@+id/shield"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:onClick="shieldClicked"
-        android:visibility="visible" />
+        android:scaleType="fitXY"
+        android:visibility="invisible"
+        ads:srcCompat="@drawable/shield" />
 
     <LinearLayout
         android:id="@+id/fuelSummary"
@@ -81,7 +100,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/rounded_corners"
+        android:background="@drawable/rounded_corners_grey_accent"
         android:onClick="hideSummary"
         android:orientation="vertical"
         android:visibility="invisible">
@@ -102,9 +121,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
-            android:background="@drawable/rounded_corners_grey"
+            android:background="@drawable/rounded_corners_drkgrey_orange"
             android:text="amount"
             android:textAlignment="center"
+            android:textColor="@android:color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -149,11 +169,12 @@
                 android:layout_marginStart="64dp"
                 android:layout_marginTop="8dp"
                 android:layout_weight="2"
-                android:background="@drawable/rounded_corners_grey"
+                android:background="@drawable/rounded_corners_grey_accent"
                 android:hint="date"
                 android:inputType="numberDecimal"
                 android:onClick="setFuelDate"
                 android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -169,10 +190,11 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
-                android:background="@drawable/rounded_corners_grey"
+                android:background="@drawable/rounded_corners_grey_accent"
                 android:hint="Odometer Reading"
                 android:inputType="numberDecimal"
                 android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="18sp" />
 
             <TextView
@@ -191,10 +213,11 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
-                android:background="@drawable/rounded_corners_grey"
+                android:background="@drawable/rounded_corners_grey_accent"
                 android:hint="Trip Counter"
                 android:inputType="numberDecimal"
                 android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -210,10 +233,11 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_weight="2"
-                android:background="@drawable/rounded_corners_grey"
+                android:background="@drawable/rounded_corners_grey_accent"
                 android:hint="Litres"
                 android:inputType="numberDecimal"
                 android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="18sp" />
 
             <EditText
@@ -222,25 +246,12 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_weight="2"
-                android:background="@drawable/rounded_corners_grey"
+                android:background="@drawable/rounded_corners_grey_accent"
                 android:hint="Price per Ltr"
                 android:inputType="numberDecimal"
                 android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="18sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
         </LinearLayout>
 
         <com.google.android.gms.ads.AdView
@@ -267,20 +278,5 @@
             tools:layout_editor_absoluteY="133dp" />
 
     </LinearLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="24dp"
-        android:layout_marginRight="24dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:onClick="showFueling"
-        ads:elevation="12dp"
-        ads:fabSize="normal"
-        app:srcCompat="@drawable/plus" />
 
 </RelativeLayout>

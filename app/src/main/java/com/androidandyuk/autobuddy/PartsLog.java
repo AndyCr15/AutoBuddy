@@ -75,71 +75,72 @@ public class PartsLog extends AppCompatActivity {
 
         bikeDetails = findViewById(R.id.bikeDetails);
 
-        bikeTitle.setText(bikes.get(activeBike).toString());
+        if(activeBike>=0) {
+            bikeTitle.setText(bikes.get(activeBike).toString());
 
-        Bike thisBike = bikes.get(activeBike);
-        for (int i = (thisBike.maintenanceLogs.size()-1); i > -1; i--) {
-            maintenanceLogDetails thisLog = thisBike.maintenanceLogs.get(i);
+            Bike thisBike = bikes.get(activeBike);
+            for (int i = (thisBike.maintenanceLogs.size() - 1); i > -1; i--) {
+                maintenanceLogDetails thisLog = thisBike.maintenanceLogs.get(i);
 
-            Double miles = thisBike.estMileage - thisLog.mileage;
-            // check what setting the user has, Miles or Km
-            // if Km, convert to Miles for display
-            if(milesSetting.equals("Km")){
-                miles = miles / conversion;
-            }
-            String milesSince = oneDecimal.format(miles) + " ";
+                Double miles = thisBike.estMileage - thisLog.mileage;
+                // check what setting the user has, Miles or Km
+                // if Km, convert to Miles for display
+                if (milesSetting.equals("Km")) {
+                    miles = miles / conversion;
+                }
+                String milesSince = oneDecimal.format(miles) + " ";
 
-            if(thisLog.brakePads){
-                padsMiles.setText(milesSince + milesSetting + " ago");
-                padsDate.setText(thisLog.date);
-            }
+                if (thisLog.brakePads) {
+                    padsMiles.setText(milesSince + milesSetting + " ago");
+                    padsDate.setText(thisLog.date);
+                }
 
-            if(thisLog.brakeDiscs){
-                discsMiles.setText(milesSince + milesSetting + " ago");
-                discsDate.setText(thisLog.date);
-            }
+                if (thisLog.brakeDiscs) {
+                    discsMiles.setText(milesSince + milesSetting + " ago");
+                    discsDate.setText(thisLog.date);
+                }
 
-            if(thisLog.frontTyre){
-                frontMiles.setText(milesSince + milesSetting + " ago");
-                frontDate.setText(thisLog.date);
-            }
+                if (thisLog.frontTyre) {
+                    frontMiles.setText(milesSince + milesSetting + " ago");
+                    frontDate.setText(thisLog.date);
+                }
 
-            if(thisLog.rearTyre){
-                rearMiles.setText(milesSince + milesSetting + " ago");
-                rearDate.setText(thisLog.date);
-            }
+                if (thisLog.rearTyre) {
+                    rearMiles.setText(milesSince + milesSetting + " ago");
+                    rearDate.setText(thisLog.date);
+                }
 
-            if(thisLog.oilChange){
-                oilMiles.setText(milesSince + milesSetting + " ago");
-                oilDate.setText(thisLog.date);
-            }
+                if (thisLog.oilChange) {
+                    oilMiles.setText(milesSince + milesSetting + " ago");
+                    oilDate.setText(thisLog.date);
+                }
 
-            if(thisLog.newBattery){
-                batteryMiles.setText(milesSince + milesSetting + " ago");
-                batteryDate.setText(thisLog.date);
-            }
+                if (thisLog.newBattery) {
+                    batteryMiles.setText(milesSince + milesSetting + " ago");
+                    batteryDate.setText(thisLog.date);
+                }
 
-            if(thisLog.coolantChange){
-                coolantMiles.setText(milesSince + milesSetting + " ago");
-                coolantDate.setText(thisLog.date);
-            }
+                if (thisLog.coolantChange) {
+                    coolantMiles.setText(milesSince + milesSetting + " ago");
+                    coolantDate.setText(thisLog.date);
+                }
 
-            if(thisLog.sparkPlugs){
-                sparksMiles.setText(milesSince + milesSetting + " ago");
-                sparksDate.setText(thisLog.date);
-            }
+                if (thisLog.sparkPlugs) {
+                    sparksMiles.setText(milesSince + milesSetting + " ago");
+                    sparksDate.setText(thisLog.date);
+                }
 
-            if(thisLog.airFilter){
-                airMiles.setText(milesSince + milesSetting + " ago");
-                airDate.setText(thisLog.date);
-            }
+                if (thisLog.airFilter) {
+                    airMiles.setText(milesSince + milesSetting + " ago");
+                    airDate.setText(thisLog.date);
+                }
 
-            if(thisLog.brakeFluid){
-                fluidMiles.setText(milesSince + milesSetting + " ago");
-                fluidDate.setText(thisLog.date);
+                if (thisLog.brakeFluid) {
+                    fluidMiles.setText(milesSince + milesSetting + " ago");
+                    fluidDate.setText(thisLog.date);
+                }
             }
         }
-
     }
 
     public void checkBackground() {

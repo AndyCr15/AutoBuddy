@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="0"
-        android:background="@drawable/rounded_corners_grey_orange"
+        android:background="@drawable/rounded_corners_edge"
         android:orientation="vertical"
         android:padding="8dp">
 
@@ -42,6 +42,7 @@
                 android:layout_weight="1"
                 android:text="Count"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
             <TextView
@@ -52,6 +53,7 @@
                 android:layout_weight="1"
                 android:text="Miles"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
             <TextView
@@ -62,6 +64,7 @@
                 android:layout_weight="1"
                 android:text="Spend"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -81,6 +84,7 @@
                 android:layout_weight="1"
                 android:text="Litres"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
             <TextView
@@ -91,6 +95,7 @@
                 android:layout_weight="1"
                 android:text="MPG"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
             <TextView
@@ -101,6 +106,7 @@
                 android:layout_weight="1"
                 android:text="Tank Spend"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -120,6 +126,7 @@
                 android:layout_weight="1"
                 android:text="£ / mi"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
             <TextView
@@ -130,6 +137,7 @@
                 android:layout_weight="1"
                 android:text="Miles / Tank"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
             <TextView
@@ -140,6 +148,7 @@
                 android:layout_weight="1"
                 android:text="Ave Price"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
         </LinearLayout>
 

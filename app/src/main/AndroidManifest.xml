@@ -2,18 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.androidandyuk.autobuddy">
 
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality. 
-    -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="fractal5.mythirdapp.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".App"
@@ -26,21 +23,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- android:backupAgent=".MyBackupAgent" -->
-
-
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBhnz3jukkMW4OSi9TjXnTCCCVHDC7r37A" />
+            android:value="AIzaSyA4vYP7mT2iF0s_XZGF9tTDzL381DbaLTk" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
         <!-- <meta-data -->
         <!-- android:name="com.google.android.backup.api_key" -->
         <!-- android:value="AEdPqrEAAAAILBrSZaiKBIa1ylQupITalbvc9ZFsfI-Nvl-jiw" /> -->
@@ -54,10 +42,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--<activity-->
-            <!--android:name=".MainActivity"-->
-            <!--android:label="Auto Buddy"-->
-            <!--android:theme="@style/AppTheme" />-->
+
         <activity
             android:name=".Favourites"
             android:label="Favourites"
@@ -72,10 +57,6 @@
             android:name=".RaceTracks"
             android:label="Tracks"
             android:theme="@style/AppTheme" />
-        <!-- <activity -->
-        <!-- android:name=".Settings" -->
-        <!-- android:label="Settings" -->
-        <!-- android:theme="@style/SettingsTheme" /> -->
         <activity
             android:name=".LocationInfoActivity"
             android:label="@string/title_activity_location_info"
@@ -134,7 +115,19 @@
         <activity
             android:name=".Settings"
             android:label="Settings" />
-        <activity android:name=".AnnualReports"></activity>
+        <activity
+            android:name=".AnnualReports"/>
+
+        <receiver android:name=".NotificationReceiver" />
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="500">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

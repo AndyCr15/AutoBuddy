@@ -51,4 +51,15 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/instructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:onClick="hideInstructions"
+        android:scaleType="fitXY"
+        android:src="@drawable/instructions"
+        android:visibility="invisible"
+        ads:srcCompat="@drawable/instructions" />
+
 </RelativeLayout>

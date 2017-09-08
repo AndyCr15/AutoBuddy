@@ -10,7 +10,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
 
         <TextView
             android:id="@+id/selectedVehicle"
@@ -24,7 +26,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_weight="0"
-            android:background="@drawable/rounded_corners_grey_orange"
+            android:background="@drawable/rounded_corners_primary"
             android:padding="8dp"
             android:text="Selected Vehicle"
             android:textAlignment="center"
@@ -41,7 +43,8 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:layout_weight="0"
-            android:background="@drawable/rounded_corners_grey"
+            android:alpha="0.8"
+            android:background="@drawable/rounded_corners_drkgrey_orange"
             android:padding="8dp" />
 
         <ListView
@@ -49,6 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="8dp"
+            android:alpha="0.8"
             android:padding="8dp" />
     </LinearLayout>
 

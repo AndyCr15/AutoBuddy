@@ -65,7 +65,7 @@ public class AnnualReports extends AppCompatActivity {
         spinnerArray.add("Maintenance");
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, spinnerArray);
+                this, R.layout.spinner_item, spinnerArray);
 
         reportChoice.setAdapter(adapter);
 
@@ -369,7 +369,7 @@ public class AnnualReports extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             AnnualReports.main.setBackground(drawablePic);
-            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             AnnualReports.main.setBackgroundColor(getResources().getColor(R.color.background));
         }

@@ -19,36 +19,12 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/bikeTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="8dp"
-            android:alpha="0.9"
-            android:background="@drawable/rounded_corners"
-            android:onClick="nextBike"
-            android:paddingBottom="5dp"
-            android:paddingEnd="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingStart="10dp"
-            android:paddingTop="5dp"
-            android:text="Use the plus button to add vehicle"
-            android:textAlignment="center"
-            android:textColor="@android:color/white"
-            android:textSize="24sp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <LinearLayout
             android:id="@+id/bikeDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:alpha="0.9"
-            android:background="@drawable/rounded_corners"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -60,6 +36,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -67,9 +44,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Registration"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -77,12 +54,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:clickable="true"
                     android:hint="Enter Reg"
                     android:onClick="TextViewClicked"
                     android:text="Tap to enter"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp"
                     tools:text="Enter Reg" />
             </LinearLayout>
@@ -90,6 +67,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -97,9 +75,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="MOT Due"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -107,16 +85,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:onClick="setMOTdue"
                     android:text="tbc"
                     android:textAlignment="center"
-                    android:textSize="18sp" />
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -124,9 +103,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Service Due"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -134,16 +113,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:onClick="setServiceDue"
                     android:text="tbc"
                     android:textAlignment="center"
-                    android:textSize="18sp" />
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -152,9 +132,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Tax Due End Of"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <Spinner
@@ -162,7 +142,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="tbc"
                     android:textAlignment="center"
                     android:textSize="18sp" />
@@ -171,6 +150,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -180,9 +160,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Last Known Mileage"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -190,19 +170,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:onClick="cantSetMileage"
                     android:text="tbc"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
             </LinearLayout>
 
         </LinearLayout>
@@ -210,23 +182,23 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             android:alpha="0.9"
-            android:background="@drawable/rounded_corners"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textView14"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:layout_marginStart="4dp"
+                android:background="@drawable/rounded_corners"
+                android:paddingLeft="24dp"
                 android:text="12 Month Figures"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -236,9 +208,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Miles Done"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -246,10 +218,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:onClick="cantSetMPG"
                     android:text="tbc"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
             </LinearLayout>
@@ -257,6 +229,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -266,9 +239,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Average MPG"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -276,10 +249,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:onClick="cantSetMPG"
                     android:text="tbc"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
             </LinearLayout>
@@ -287,6 +260,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:orientation="horizontal"
                 tools:layout_editor_absoluteX="8dp"
                 tools:layout_editor_absoluteY="8dp">
@@ -296,9 +270,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:text="Cost Per Mile"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
 
                 <TextView
@@ -306,12 +280,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:background="@drawable/rounded_corners_grey_orange"
                     android:onClick="cantSetSpent"
                     android:text="tbc"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="18sp" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView17"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_corners"
+                android:paddingLeft="24dp"
+                android:text="Vehicle Notes"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
 
         </LinearLayout>
 
@@ -322,13 +306,14 @@
             android:layout_margin="8dp"
             android:layout_weight="1"
             android:alpha="0.9"
-            android:background="@drawable/rounded_corners_grey_orange"
+            android:background="@drawable/rounded_corners_edge"
             android:gravity="top"
             android:hint="Enter your notes here"
             android:inputType="textCapSentences|textMultiLine"
-            android:scrollHorizontally="false"
             android:maxHeight="100dp"
             android:padding="5dp"
+            android:scrollHorizontally="false"
+            android:textColor="@color/colorGrey"
             android:textSize="18sp" />
 
     </LinearLayout>
@@ -338,7 +323,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:onClick="shieldClicked"
-        android:visibility="invisible" />
+        android:scaleType="fitXY"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/shield" />
 
     <RelativeLayout
         android:id="@+id/addingBikeInfo"
@@ -346,7 +333,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:alpha="1"
-        android:background="@drawable/rounded_corners_grey_orange"
+        android:background="@drawable/rounded_corners_primary"
         android:elevation="24dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -443,31 +430,23 @@
         android:id="@+id/getDetails"
         android:layout_width="270dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/rounded_corners_grey_orange"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/rounded_corners_primary"
         android:elevation="24dp"
         android:orientation="vertical"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.13999999"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp">
+        android:visibility="invisible">
 
         <EditText
             android:id="@+id/getDetailsText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:background="@drawable/rounded_corners"
             android:hint="Enter Details"
             android:inputType="textCapCharacters"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 

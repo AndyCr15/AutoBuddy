@@ -38,6 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Name"
+        android:textColor="@color/colorGrey"
         android:textSize="24sp" />
 
 </LinearLayout>

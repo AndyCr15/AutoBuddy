@@ -196,7 +196,7 @@ public class Favourites extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Favourites.main.setBackground(drawablePic);
-            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             Favourites.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
             listView.setBackground(null);

@@ -278,7 +278,7 @@ public class ToDo extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             ToDo.main.setBackground(drawablePic);
-            toDoList.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
+            toDoList.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             ToDo.main.setBackgroundColor(getResources().getColor(R.color.background));
             toDoList.setBackground(null);

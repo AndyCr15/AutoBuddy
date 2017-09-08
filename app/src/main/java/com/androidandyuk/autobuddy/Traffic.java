@@ -291,7 +291,7 @@ public class Traffic extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Traffic.main.setBackground(drawablePic);
-            trafficList.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
+            trafficList.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             Traffic.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
             trafficList.setBackground(null);

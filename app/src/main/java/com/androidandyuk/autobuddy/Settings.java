@@ -1,7 +1,10 @@
 package com.androidandyuk.autobuddy;
 
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -17,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -51,8 +56,12 @@ import static com.androidandyuk.autobuddy.MainActivity.lastHowManyFuels;
 import static com.androidandyuk.autobuddy.MainActivity.loadBikes;
 import static com.androidandyuk.autobuddy.MainActivity.locationUpdatesTime;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
+import static com.androidandyuk.autobuddy.MainActivity.notiHour;
+import static com.androidandyuk.autobuddy.MainActivity.notiMinute;
+import static com.androidandyuk.autobuddy.MainActivity.notificationsWanted;
 import static com.androidandyuk.autobuddy.MainActivity.saveSettings;
 import static com.androidandyuk.autobuddy.MainActivity.sdf;
+import static com.androidandyuk.autobuddy.MainActivity.warningDays;
 
 public class Settings extends AppCompatActivity {
 
@@ -60,13 +69,19 @@ public class Settings extends AppCompatActivity {
 
     TextView locationUpdatesTimeTV;
     TextView lastHowManyFuelsTV;
+    TextView warningDaysTV;
+    TextView notiHourTV;
 
     Switch incCarShows;
     Switch incBikeShows;
     Switch backgroundsWantedSW;
+    Switch notificationsWantedSW;
 
     Spinner currencySpinner;
     Spinner milesSpinner;
+    View settings;
+
+    static final int TIME_DIALOG_ID = 11;
 
     public static ImageView shield;
 
@@ -80,7 +95,7 @@ public class Settings extends AppCompatActivity {
         setContentView(com.androidandyuk.autobuddy.R.layout.activity_settings);
 
         currencySpinner = (Spinner) findViewById(com.androidandyuk.autobuddy.R.id.currencySpinner);
-        currencySpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Currency.values()));
+        currencySpinner.setAdapter(new ArrayAdapter<>(this, R.layout.spinner_item, Currency.values()));
 
         switch (currencySetting) {
             case "£":
@@ -96,7 +111,7 @@ public class Settings extends AppCompatActivity {
 
 
         milesSpinner = (Spinner) findViewById(com.androidandyuk.autobuddy.R.id.milesSpinner);
-        milesSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, MilesKM.values()));
+        milesSpinner.setAdapter(new ArrayAdapter<>(this, R.layout.spinner_item, MilesKM.values()));
 
         switch (milesSetting) {
             case "Miles":
@@ -110,6 +125,11 @@ public class Settings extends AppCompatActivity {
         lastHowManyFuelsTV = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.numberFuels);
         lastHowManyFuelsTV.setText(Integer.toString(lastHowManyFuels));
 
+        warningDaysTV = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.warningDaysTV);
+        warningDaysTV.setText(Integer.toString(warningDays));
+
+        setNotiTV();
+
         locationUpdatesTimeTV = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.minutesBetween);
         locationUpdatesTimeTV.setText(Integer.toString(locationUpdatesTime / 60000));
 
@@ -122,7 +142,19 @@ public class Settings extends AppCompatActivity {
         backgroundsWantedSW = (Switch) findViewById(com.androidandyuk.autobuddy.R.id.backgroundsWanted);
         backgroundsWantedSW.setChecked(backgroundsWanted);
 
+        notificationsWantedSW = (Switch) findViewById(com.androidandyuk.autobuddy.R.id.notificationsWanted);
+        notificationsWantedSW.setChecked(notificationsWanted);
+
         shield = (ImageView) findViewById(R.id.shield);
+    }
+
+    private void setNotiTV() {
+        notiHourTV = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.notiHourTV);
+        String mins = Integer.toString(notiMinute);
+        if (notiMinute < 10) {
+            mins = "0" + mins;
+        }
+        notiHourTV.setText(notiHour + ":" + mins);
     }
 
     public void getDetailsClicked(View view) {
@@ -134,25 +166,26 @@ public class Settings extends AppCompatActivity {
         Log.i("Checking Details", details);
         switch (tag) {
             case "fuels":
-                try {
-                    lastHowManyFuels = Integer.parseInt(details);
-                    lastHowManyFuelsTV = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.numberFuels);
-                    lastHowManyFuelsTV.setText(details);
-                    ed.putInt("lastHowManyFuels", Integer.parseInt(details)).apply();
-                } catch (NumberFormatException e) {
-                    Toast.makeText(this, "Not a valid entry", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
+                lastHowManyFuels = Integer.parseInt(details);
+                lastHowManyFuelsTV = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.numberFuels);
+                lastHowManyFuelsTV.setText(details);
+                ed.putInt("lastHowManyFuels", Integer.parseInt(details)).apply();
                 break;
             case "minutes":
-                try {
-                    locationUpdatesTime = Integer.parseInt(details) * 60000;
-                    locationUpdatesTimeTV = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.minutesBetween);
-                    locationUpdatesTimeTV.setText(details);
-                    ed.putInt("locationUpdatesTime", Integer.parseInt(details)).apply();
-                } catch (NumberFormatException e) {
+                locationUpdatesTime = Integer.parseInt(details) * 60000;
+                locationUpdatesTimeTV = (TextView) findViewById(R.id.minutesBetween);
+                locationUpdatesTimeTV.setText(details);
+                ed.putInt("locationUpdatesTime", Integer.parseInt(details)).apply();
+                break;
+            case "How many days":
+                int days = Integer.parseInt(details);
+                if (days > 0 && days < 40) {
+                    warningDays = days;
+                    warningDaysTV = (TextView) findViewById(R.id.warningDaysTV);
+                    warningDaysTV.setText(details);
+                    ed.putInt("locationUpdatesTime", days).apply();
+                } else {
                     Toast.makeText(this, "Not a valid entry", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
                 }
                 break;
             case "fuels url":
@@ -164,11 +197,37 @@ public class Settings extends AppCompatActivity {
         }
     }
 
+    public void setNotificationTime(View view) {
+//        TimePicker timePicker = (TimePicker) findViewById(R.id.timePicker);
+
+        TimePickerDialog timePicker = new TimePickerDialog(
+                Settings.this,
+                R.style.datepicker,
+                timePickerListener,
+                notiHour, notiMinute, true);
+        timePicker.getWindow().setBackgroundDrawable(new ColorDrawable(Color.LTGRAY));
+        timePicker.show();
+    }
+
+    TimePickerDialog.OnTimeSetListener timePickerListener =
+            new TimePickerDialog.OnTimeSetListener() {
+                public void onTimeSet(TimePicker view, int hourOfDay,
+                                      int selectedMinute) {
+                    notiHour = hourOfDay;
+                    notiMinute = selectedMinute;
+                    ed.putInt("notiHour", notiHour).apply();
+                    ed.putInt("notiMinute", notiMinute).apply();
+                    setNotiTV();
+                }
+            };
+
     public void getDetails(String hint) {
         Log.i("Get Details", hint);
         getDetails = findViewById(R.id.getDetails);
         getDetails.setVisibility(View.VISIBLE);
         shield.setVisibility(View.VISIBLE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         final EditText thisET = (EditText) findViewById(R.id.getDetailsText);
         thisET.setHint(hint);
 
@@ -187,6 +246,7 @@ public class Settings extends AppCompatActivity {
                     shield.setVisibility(View.INVISIBLE);
                     thisET.setText(null);
                     checkDetails();
+                    hideDetails();
                     return true;
                 }
                 return false;
@@ -194,30 +254,39 @@ public class Settings extends AppCompatActivity {
         });
     }
 
-    public void submitPressed(View view){
-        Log.i("submitPressed","Started");
+    public void hideDetails() {
+        View thisView = this.getCurrentFocus();
+        if (thisView != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(thisView.getWindowToken(), 0);
+        }
+        getDetails.setVisibility(View.INVISIBLE);
+        shield.setVisibility(View.INVISIBLE);
+    }
+
+    public void submitPressed(View view) {
+        Log.i("submitPressed", "Started");
         getDetails = findViewById(R.id.getDetails);
         EditText thisET = (EditText) findViewById(R.id.getDetailsText);
         details = thisET.getText().toString();
         Log.i("Details", details);
-        getDetails.setVisibility(View.INVISIBLE);
-        shield.setVisibility(View.INVISIBLE);
         thisET.setText(null);
         checkDetails();
+        hideDetails();
     }
 
-    public void shieldClicked(View view){
-        if(getDetails.isShown()){
+    public void shieldClicked(View view) {
+        if (getDetails.isShown()) {
             getDetails.setVisibility(View.INVISIBLE);
             shield.setVisibility(View.INVISIBLE);
         }
     }
 
-    public void exportDBPressed(View view){
+    public void exportDBPressed(View view) {
         exportDB();
     }
 
-    public void importDBPressed(View view){
+    public void importDBPressed(View view) {
         importDB();
     }
 
@@ -228,16 +297,16 @@ public class Settings extends AppCompatActivity {
         FileChannel source = null;
         FileChannel destination = null;
 
-        File dir = new File(Environment.getExternalStorageDirectory()+"/AutoBuddy/");
+        File dir = new File(Environment.getExternalStorageDirectory() + "/AutoBuddy/");
 //        Log.i("dir is ", "" + dir);
 //        dir.mkdir();
-        try{
-            if(dir.mkdir()) {
+        try {
+            if (dir.mkdir()) {
                 System.out.println("Directory created");
             } else {
                 System.out.println("Directory is not created");
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             Log.i("Creating Dir Error", "" + e);
         }
@@ -363,7 +432,7 @@ public class Settings extends AppCompatActivity {
                     String startDate = thisFuel.getString("Data");
                     String[] parts = startDate.split("-");
                     int year = Integer.parseInt(parts[0]);
-                    int month = Integer.parseInt(parts[1])-1;
+                    int month = Integer.parseInt(parts[1]) - 1;
                     int day = Integer.parseInt(parts[2]);
                     GregorianCalendar cal = new GregorianCalendar();
                     cal.set(Calendar.YEAR, year);
@@ -440,13 +509,13 @@ public class Settings extends AppCompatActivity {
 
                 bikes.get(activeBike).maintenanceLogs.clear();
 
-                for (int i = 0; i<json.length(); i++) {
+                for (int i = 0; i < json.length(); i++) {
                     JSONObject thisCost = json.getJSONObject(i);
 
                     String startDate = thisCost.getString("Date");
                     String[] parts = startDate.split("-");
                     int year = Integer.parseInt(parts[0]);
-                    int month = Integer.parseInt(parts[1])-1;
+                    int month = Integer.parseInt(parts[1]) - 1;
                     int day = Integer.parseInt(parts[2]);
                     GregorianCalendar cal = new GregorianCalendar();
                     cal.set(Calendar.YEAR, year);
@@ -461,7 +530,7 @@ public class Settings extends AppCompatActivity {
                     Double cost = Double.parseDouble(thisCost.getString("Cost"));
 
                     String fullNotes = "** " + title + " ** : " + notes;
-                    Log.i("Adding maintenance ", date + " " + fullNotes +" " + mileage + " " + cost);
+                    Log.i("Adding maintenance ", date + " " + fullNotes + " " + mileage + " " + cost);
                     maintenanceLogDetails theseDetails = new maintenanceLogDetails(date, fullNotes, cost, mileage);
                     bikes.get(activeBike).maintenanceLogs.add(theseDetails);
                 }
@@ -506,8 +575,12 @@ public class Settings extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             Settings.main.setBackground(drawablePic);
+            settings = findViewById(R.id.settings);
+            settings.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             Settings.main.setBackgroundColor(getResources().getColor(com.androidandyuk.autobuddy.R.color.background));
+            settings = findViewById(R.id.settings);
+            settings.setBackground(null);
         }
     }
 
@@ -521,8 +594,7 @@ public class Settings extends AppCompatActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             getDetails = findViewById(R.id.getDetails);
             if (getDetails.isShown()) {
-                getDetails.setVisibility(View.INVISIBLE);
-                shield.setVisibility(View.INVISIBLE);
+                hideDetails();
             } else {
                 finish();
                 return true;
@@ -538,6 +610,7 @@ public class Settings extends AppCompatActivity {
         incCarEvents = incCarShows.isChecked();
         incBikeEvents = incBikeShows.isChecked();
         backgroundsWanted = backgroundsWantedSW.isChecked();
+        notificationsWanted = notificationsWantedSW.isChecked();
 
         currencySpinner = (Spinner) findViewById(com.androidandyuk.autobuddy.R.id.currencySpinner);
         currencySetting = currencySpinner.getSelectedItem().toString();

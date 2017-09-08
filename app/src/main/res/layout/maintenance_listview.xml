@@ -28,7 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_vertical|center_horizontal"
-            android:text="Miles" />
+            android:text="Miles"
+            android:textColor="@color/colorGrey" />
 
     </LinearLayout>
 
@@ -38,6 +39,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:text="Name"
+        android:textColor="@color/colorGrey"
         android:textSize="12sp" />
 
     <TextView

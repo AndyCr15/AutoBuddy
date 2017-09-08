@@ -14,6 +14,7 @@
         android:padding="4dp"
         android:text="ToDo details"
         android:textAlignment="textStart"
+        android:textColor="@color/colorGrey"
         android:textSize="18sp"
         android:textStyle="bold" />
 

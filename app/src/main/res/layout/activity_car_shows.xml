@@ -43,7 +43,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_weight="1"
-                android:background="@drawable/rounded_corners_grey"
+                android:background="@drawable/rounded_corners_drkgrey_orange"
                 android:onClick="suggestShow"
                 android:text="Suggest A Show"
                 android:textColor="@android:color/white" />
@@ -59,7 +59,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_weight="1"
-                android:background="@drawable/rounded_corners_grey"
+                android:background="@drawable/rounded_corners_drkgrey_orange"
                 android:onClick="updateShowsButton"
                 android:text="Update List"
                 android:textColor="@android:color/white" />

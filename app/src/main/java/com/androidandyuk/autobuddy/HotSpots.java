@@ -153,9 +153,10 @@ public class HotSpots extends AppCompatActivity {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             HotSpots.main.setBackground(drawablePic);
-            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey));
+            listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
         } else {
             HotSpots.main.setBackgroundColor(getResources().getColor(R.color.background));
+            listView.setBackground(null);
         }
     }
 

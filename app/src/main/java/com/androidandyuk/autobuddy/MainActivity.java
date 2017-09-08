@@ -1,6 +1,8 @@
 package com.androidandyuk.autobuddy;
 
+import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.backup.BackupManager;
@@ -11,6 +13,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
 import android.location.LocationListener;
@@ -21,6 +24,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,7 +34,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,6 +54,8 @@ import static com.androidandyuk.autobuddy.ToDo.saveToDos;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+
     public static SharedPreferences sharedPreferences;
     public static SharedPreferences.Editor ed;
 
@@ -63,11 +68,15 @@ public class MainActivity extends AppCompatActivity {
 
     public static RelativeLayout main;
 
+    public static Boolean instructionsRead;
+
     public static LatLng userLatLng;
     public static JSONObject jsonObject;
     public static TextView weatherText;
     public static String currentForecast;
     public static int warningDays = 30;
+    public static int notiHour = 10;
+    public static int notiMinute = 0;
     public static String currencySetting;
     public static String milesSetting;
 
@@ -89,8 +98,9 @@ public class MainActivity extends AppCompatActivity {
     public static int lastHowManyFuels;
     public static boolean incCarEvents;
     public static boolean incBikeEvents;
-    public static String jsonLocation = "http://www.lanarchy.co.uk/";
+    public static String jsonLocation = "http://www.androidandy.uk/json/";
     public static boolean backgroundsWanted;
+    public static boolean notificationsWanted;
 
     public static SQLiteDatabase vehiclesDB;
 
@@ -123,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         loadSettings();
 
         // check if there are any bikes
-        if(bikes.size()==0){
+        if (bikes.size() == 0) {
             activeBike = -1;
         }
 
@@ -223,9 +233,24 @@ public class MainActivity extends AppCompatActivity {
         Favourites.loadFavs();
         Favourites.sortMyList();
 
+        instructionsRead = sharedPreferences.getBoolean("instructionsRead", false);
+        ImageView instructions;
+        if (!instructionsRead) {
+            instructions = (ImageView) findViewById(R.id.instructions);
+            instructions.setVisibility(View.VISIBLE);
+        } else {
+            Intent intent = new Intent(getApplicationContext(), Garage.class);
+            startActivity(intent);
+        }
+    }
+
+    public void hideInstructions(View view) {
+        ImageView instructions;
+        ed.putBoolean("instructionsRead", true).apply();
+        instructions = (ImageView) findViewById(R.id.instructions);
+        instructions.setVisibility(View.INVISIBLE);
         Intent intent = new Intent(getApplicationContext(), Garage.class);
         startActivity(intent);
-
     }
 
     @Override
@@ -275,25 +300,6 @@ public class MainActivity extends AppCompatActivity {
                 // this bike is within limits for a warning
                 Toast.makeText(MainActivity.this, "MOT Due for " + thisBike, Toast.LENGTH_LONG).show();
                 // give a notification if not had one before
-                if (!thisBike.MOTwarned) {
-
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, 0);
-
-                    Notification notification = new Notification.Builder(getApplicationContext())
-                            .setContentTitle("MOT Due!")
-                            .setContentText("The MOT for " + thisBike + " is due within " + warningDays + " days")
-                            .setContentIntent(pendingIntent)
-//                            .addAction(android.R.drawable.btn_default, "Open App", pendingIntent)
-                            .setSmallIcon(R.drawable.ic_stat_name)
-                            .build();
-
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-                    notificationManager.notify(1, notification);
-                    thisBike.MOTwarned = true;
-
-                }
             } else {
                 thisBike.MOTwarned = false;
             }
@@ -307,25 +313,6 @@ public class MainActivity extends AppCompatActivity {
                 // this bike is within limits for a warning
                 Toast.makeText(MainActivity.this, "Service Due for " + thisBike, Toast.LENGTH_LONG).show();
                 // give a notification if not had one before
-                if (!thisBike.serviceWarned) {
-
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, 0);
-
-                    Notification notification = new Notification.Builder(getApplicationContext())
-                            .setContentTitle("Service Due!")
-                            .setContentText("The Service for " + thisBike + " is due within " + warningDays + " days")
-                            .setContentIntent(pendingIntent)
-//                            .addAction(android.R.drawable.btn_default, "Open App", pendingIntent)
-                            .setSmallIcon(R.drawable.ic_stat_name)
-                            .build();
-
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-                    notificationManager.notify(1, notification);
-                    thisBike.serviceWarned = true;
-
-                }
             } else {
                 thisBike.serviceWarned = false;
             }
@@ -333,41 +320,249 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void goToLocations(View view) {
-        Intent intent = new Intent(getApplicationContext(), Locations.class);
-        startActivity(intent);
-    }
+    public void nextNotification(Context context) {
+        Log.i(TAG, "nextNotification");
 
-    public void goToGarage(View view) {
-        Intent intent = new Intent(getApplicationContext(), Garage.class);
-        startActivity(intent);
-    }
+        SharedPreferences sharedPreferences = context.getSharedPreferences("com.androidandyuk.autobuddy", Context.MODE_PRIVATE);
+        int warningDays = sharedPreferences.getInt("warningDays", 30);
+        int notiHour = sharedPreferences.getInt("notiHour", 10);
+        int notiMinute = sharedPreferences.getInt("notiMinute", 0);
 
-    public void goToAnnualReports(View view) {
-        Intent intent = new Intent(getApplicationContext(), AnnualReports.class);
-        startActivity(intent);
-    }
+        // make versions of the array and database that can be used by the service
+        ArrayList<Bike> theseBikes = new ArrayList<>();
 
-    public void goToFueling(View view) {
-        if (activeBike > -1) {
-            Intent intent = new Intent(getApplicationContext(), Fuelling.class);
-            startActivity(intent);
-        } else {
-            Toast.makeText(MainActivity.this, "Add a bike in your Garage first", Toast.LENGTH_LONG).show();
+        SQLiteDatabase vehiclesDB = context.openOrCreateDatabase("Vehicles", MODE_PRIVATE, null);
+
+        vehiclesDB.execSQL("CREATE TABLE IF NOT EXISTS vehicles (make VARCHAR, model VARCHAR, reg VARCHAR, bikeId VARCHAR, VIN VARCHAR, serviceDue VARCHAR, MOTdue VARCHAR" +
+                ", lastKnownService VARCHAR, lastKnownMOT VARCHAR, yearOfMan VARCHAR, notes VARCHAR, estMileage VARCHAR, MOTwarned VARCHAR, serviceWarned VARCHAR, taxDue VARCHAR)");
+
+        try {
+
+            Cursor c = vehiclesDB.rawQuery("SELECT * FROM vehicles", null);
+
+            int makeIndex = c.getColumnIndex("make");
+            int modelIndex = c.getColumnIndex("model");
+            int regIndex = c.getColumnIndex("reg");
+            int bikeIdIndex = c.getColumnIndex("bikeId");
+            int VINIndex = c.getColumnIndex("VIN");
+            int serviceDueIndex = c.getColumnIndex("serviceDue");
+            int MOTdueIndex = c.getColumnIndex("MOTdue");
+            int lastKnownServiceIndex = c.getColumnIndex("lastKnownService");
+            int lastKnownMOTIndex = c.getColumnIndex("lastKnownMOT");
+            int yearOfManIndex = c.getColumnIndex("yearOfMan");
+            int notesIndex = c.getColumnIndex("notes");
+            int estMileageIndex = c.getColumnIndex("estMileage");
+            int MOTwarnedIndex = c.getColumnIndex("MOTwarned");
+            int serviceWarnedIndex = c.getColumnIndex("serviceWarned");
+            int taxDueIndex = c.getColumnIndex("taxDue");
+
+            c.moveToFirst();
+
+            do {
+
+                ArrayList<String> make = new ArrayList<>();
+                ArrayList<String> model = new ArrayList<>();
+                ArrayList<String> reg = new ArrayList<>();
+                ArrayList<String> bikeId = new ArrayList<>();
+                ArrayList<String> VIN = new ArrayList<>();
+                ArrayList<String> serviceDue = new ArrayList<>();
+                ArrayList<String> MOTdue = new ArrayList<>();
+                ArrayList<String> lastKnownService = new ArrayList<>();
+                ArrayList<String> lastKnownMOT = new ArrayList<>();
+                ArrayList<String> yearOfMan = new ArrayList<>();
+                ArrayList<String> notes = new ArrayList<>();
+                ArrayList<String> estMileage = new ArrayList<>();
+                ArrayList<String> MOTwarned = new ArrayList<>();
+                ArrayList<String> serviceWarned = new ArrayList<>();
+                ArrayList<String> taxDue = new ArrayList<>();
+
+                try {
+
+                    make = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(makeIndex));
+                    model = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(modelIndex));
+                    reg = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(regIndex));
+                    bikeId = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(bikeIdIndex));
+                    VIN = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(VINIndex));
+                    serviceDue = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(serviceDueIndex));
+                    MOTdue = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(MOTdueIndex));
+                    lastKnownService = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(lastKnownServiceIndex));
+                    lastKnownMOT = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(lastKnownMOTIndex));
+                    yearOfMan = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(yearOfManIndex));
+                    notes = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(notesIndex));
+                    estMileage = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(estMileageIndex));
+                    MOTwarned = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(MOTwarnedIndex));
+                    serviceWarned = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(serviceWarnedIndex));
+                    taxDue = (ArrayList<String>) ObjectSerializer.deserialize(c.getString(taxDueIndex));
+
+                    Log.i("Bikes Restored ", "Count :" + make.size());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("Loading Bikes", "Failed attempt");
+                }
+
+                Log.i("Retrieved info", "Log count :" + make.size());
+                if (make.size() > 0 && model.size() > 0 && bikeId.size() > 0) {
+                    // we've checked there is some info
+                    if (make.size() == model.size() && model.size() == bikeId.size()) {
+                        // we've checked each item has the same amount of info, nothing is missing
+                        for (int x = 0; x < make.size(); x++) {
+                            int thisId = Integer.parseInt(bikeId.get(x));
+                            double thisEstMileage = Double.parseDouble(estMileage.get(x));
+                            boolean thisMOTwarned = Boolean.parseBoolean(MOTwarned.get(x));
+                            boolean thisServiceWarned = Boolean.parseBoolean(serviceWarned.get(x));
+                            Bike newBike = new Bike(thisId, make.get(x), model.get(x), reg.get(x), VIN.get(x), serviceDue.get(x), MOTdue.get(x), lastKnownService.get(x), lastKnownMOT.get(x),
+                                    yearOfMan.get(x), notes.get(x), thisEstMileage, thisMOTwarned, thisServiceWarned, taxDue.get(x));
+                            Log.i("Adding", " " + x + " " + newBike);
+                            theseBikes.add(newBike);
+                        }
+                    }
+                }
+            } while (c.moveToNext());
+
+        } catch (Exception e) {
+
+            Log.i("LoadingDB", "Caught Error");
+            e.printStackTrace();
+
         }
+
+        Calendar now = Calendar.getInstance();
+        // shouldn't matter what time of day it's checked, so set to notiTime
+        now.set(Calendar.HOUR_OF_DAY, 0);
+        now.set(Calendar.MINUTE, 0);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
+
+        Calendar nextNoti = Calendar.getInstance();
+        nextNoti.set(Calendar.YEAR, 9999);
+        String notiMessage = "";
+
+        for (Bike thisBike : theseBikes) {
+
+            Calendar MOTDue = new GregorianCalendar();
+            try {
+                MOTDue.setTime(sdf.parse(thisBike.MOTdue));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            Calendar serviceDue = new GregorianCalendar();
+            try {
+                serviceDue.setTime(sdf.parse(thisBike.serviceDue));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            Calendar taxDue = new GregorianCalendar();
+            TaxDue month = TaxDue.valueOf(thisBike.taxDue);
+            int taxMonth = month.ordinal();
+            taxDue.set(Calendar.MONTH, taxMonth);
+            taxDue.set(Calendar.DAY_OF_MONTH, 1);
+            if (taxDue.get(Calendar.MONTH) < now.get(Calendar.MONTH)) {
+                taxDue.add(Calendar.YEAR, 1);
+            }
+
+            //remove the warningDays
+            MOTDue.add(Calendar.DAY_OF_YEAR, - (warningDays));
+            serviceDue.add(Calendar.DAY_OF_YEAR, - (warningDays));
+            taxDue.add(Calendar.DAY_OF_YEAR, - (warningDays));
+
+            // now check which is due next
+            if (MOTDue.compareTo(nextNoti) < 0 && MOTDue.compareTo(now) >= 0) {
+//            if (MOTDue.compareTo(nextNoti) < 0) {
+                nextNoti = MOTDue;
+                notiMessage = thisBike + " MOT due in " + warningDays + " days.";
+            }
+
+            if (serviceDue.compareTo(nextNoti) < 0 && serviceDue.compareTo(now) >= 0) {
+                nextNoti = serviceDue;
+                notiMessage = thisBike + " Service due in " + warningDays + " days.";
+            }
+
+            if (taxDue.compareTo(nextNoti) < 0 && taxDue.compareTo(now) >= 0) {
+                nextNoti = taxDue;
+                notiMessage = thisBike + " Tax due in " + warningDays + " days.";
+            }
+
+            // now set alarm for the next thing due
+            nextNoti.set(Calendar.HOUR_OF_DAY, notiHour);
+            nextNoti.set(Calendar.MINUTE, notiMinute);
+            nextNoti.set(Calendar.SECOND, 0);
+            setAlarm(nextNoti, notiMessage, context);
+
+        }
+
+
     }
 
-    public void setAppTheme(int themeNum) {
-        this.setTheme(R.style.AppTheme);
+    public void setAlarm(Calendar myAlarmDate, String message, Context context) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        Intent _myIntent = new Intent(context, NotificationReceiver.class);
+        _myIntent.putExtra("MyMessage", message);
+        PendingIntent _myPendingIntent = PendingIntent.getBroadcast(context, 123, _myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, myAlarmDate.getTimeInMillis(), _myPendingIntent);
+        Log.i("setAlarm", "For : " + myAlarmDate);
+        Log.i("setAlarm", "Message : " + message);
     }
 
-    public void groupRideClicked(View view) {
-        Intent intent = new Intent(getApplicationContext(), GroupRide.class);
-        startActivity(intent);
-    }
+    public void checkNotifications(Context context, String message) {
+        Log.i(TAG, "checkNotifications");
 
-    public void emergencyClicked(View view) {
-        Toast.makeText(MainActivity.this, "Not yet implemented", Toast.LENGTH_LONG).show();
+        int notificationID = 100;
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent resultIntent = new Intent(context, MainActivity.class);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, notificationID, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // The id of the channel.
+            String id = "my_channel_01";
+            // The user-visible name of the channel.
+            CharSequence name = "Channel Name";
+            // The user-visible description of the channel.
+            String description = "Channel Desc";
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel mChannel = new NotificationChannel(id, name, importance);
+            // Configure the notification channel.
+            mChannel.setDescription(description);
+            mChannel.enableLights(true);
+            // Sets the notification light color for notifications posted to this
+            // channel, if the device supports this feature.
+            mChannel.setLightColor(Color.RED);
+            mChannel.enableVibration(true);
+            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+            notificationManager.createNotificationChannel(mChannel);
+
+
+            // Create a notification and set the notification channel.
+            Notification.Builder notification = new Notification.Builder(context)
+                    .setContentIntent(pendingIntent)
+                    .setContentTitle("Be Aware!")
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.icon)
+                    .setChannelId(id)
+                    .setAutoCancel(true);
+
+            // Issue the notification.
+            notificationManager.notify(notificationID, notification.build());
+
+        } else {
+
+            Notification.Builder notification = new Notification.Builder(context)
+                    .setContentIntent(pendingIntent)
+                    .setContentTitle("Be Aware!")
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.icon)
+                    .setAutoCancel(true);
+
+            // Issue the notification.
+            notificationManager.notify(notificationID, notification.build());
+        }
     }
 
 //    public void loadWeather(View view) {
@@ -464,68 +659,6 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.main.setBackground(drawablePic);
         } else {
             MainActivity.main.setBackgroundColor(getResources().getColor(R.color.background));
-        }
-    }
-
-    public static void saveBikesOld() {
-        Log.i("Main Activity", "New Saving Bikes");
-        ed.putInt("bikeCount", Bike.bikeCount).apply();
-
-        ArrayList<String> make = new ArrayList<>();
-        ArrayList<String> model = new ArrayList<>();
-        ArrayList<String> reg = new ArrayList<>();
-        ArrayList<String> bikeId = new ArrayList<>();
-        ArrayList<String> VIN = new ArrayList<>();
-        ArrayList<String> serviceDue = new ArrayList<>();
-        ArrayList<String> MOTdue = new ArrayList<>();
-        ArrayList<String> lastKnownService = new ArrayList<>();
-        ArrayList<String> lastKnownMOT = new ArrayList<>();
-        ArrayList<String> yearOfMan = new ArrayList<>();
-        ArrayList<String> notes = new ArrayList<>();
-        ArrayList<String> estMileage = new ArrayList<>();
-        ArrayList<String> MOTwarned = new ArrayList<>();
-        ArrayList<String> serviceWarned = new ArrayList<>();
-        ArrayList<String> taxDue = new ArrayList<>();
-
-        for (Bike thisBike : bikes) {
-            Log.i("Saving Bikes", "" + thisBike);
-
-            make.add(thisBike.make);
-            model.add(thisBike.model);
-            reg.add(thisBike.registration);
-            bikeId.add(Integer.toString(thisBike.bikeId));
-            VIN.add(thisBike.VIN);
-            serviceDue.add(thisBike.serviceDue);
-            MOTdue.add(thisBike.MOTdue);
-            lastKnownService.add(thisBike.lastKnownService);
-            lastKnownMOT.add(thisBike.lastKnownMOT);
-            yearOfMan.add(thisBike.yearOfMan);
-            notes.add(thisBike.notes);
-            estMileage.add(Double.toString(thisBike.estMileage));
-            MOTwarned.add(String.valueOf(thisBike.MOTwarned));
-            serviceWarned.add(String.valueOf(thisBike.serviceWarned));
-            taxDue.add(thisBike.taxDue);
-        }
-        Log.i("Saving Bikes", "Size :" + bikes.size());
-        try {
-            ed.putString("make", ObjectSerializer.serialize(make)).apply();
-            ed.putString("model", ObjectSerializer.serialize(model)).apply();
-            ed.putString("reg", ObjectSerializer.serialize(reg)).apply();
-            ed.putString("bikeId", ObjectSerializer.serialize(bikeId)).apply();
-            ed.putString("VIN", ObjectSerializer.serialize(VIN)).apply();
-            ed.putString("serviceDue", ObjectSerializer.serialize(serviceDue)).apply();
-            ed.putString("MOTdue", ObjectSerializer.serialize(MOTdue)).apply();
-            ed.putString("lastKnownService", ObjectSerializer.serialize(lastKnownService)).apply();
-            ed.putString("lastKnownMOT", ObjectSerializer.serialize(lastKnownMOT)).apply();
-            ed.putString("yearOfMan", ObjectSerializer.serialize(yearOfMan)).apply();
-            ed.putString("notes", ObjectSerializer.serialize(notes)).apply();
-            ed.putString("estMileage", ObjectSerializer.serialize(estMileage)).apply();
-            ed.putString("MOTwarned", ObjectSerializer.serialize(MOTwarned)).apply();
-            ed.putString("serviceWarned", ObjectSerializer.serialize(serviceWarned)).apply();
-            ed.putString("taxDue", ObjectSerializer.serialize(taxDue)).apply();
-        } catch (IOException e) {
-            Log.i("Adding details", "Failed attempt");
-            e.printStackTrace();
         }
     }
 
@@ -767,10 +900,14 @@ public class MainActivity extends AppCompatActivity {
         int bikesSize = sharedPreferences.getInt("bikesSize", 0);
         activeBike = sharedPreferences.getInt("activeBike", bikesSize - 1);
         lastHowManyFuels = sharedPreferences.getInt("lastHowManyFuels", 10);
+        warningDays = sharedPreferences.getInt("warningDays", 30);
+        notiHour = sharedPreferences.getInt("notiHour", 10);
+        notiMinute = sharedPreferences.getInt("notiMinute", 0);
         locationUpdatesTime = sharedPreferences.getInt("locationUpdatesTime", 1200000);
         incCarEvents = sharedPreferences.getBoolean("incCarEvents", true);
         incBikeEvents = sharedPreferences.getBoolean("incBikeEvents", true);
         backgroundsWanted = sharedPreferences.getBoolean("backgroundsWanted", false);
+        notificationsWanted = sharedPreferences.getBoolean("notificationsWanted", true);
         locationAccepted = sharedPreferences.getBoolean("locationAccepted", false);
         storageAccepted = sharedPreferences.getBoolean("storageAccepted", false);
         updateNeeded = sharedPreferences.getBoolean("updateNeeded3", true);
@@ -781,10 +918,14 @@ public class MainActivity extends AppCompatActivity {
     public static void saveSettings() {
         ed.putInt("activeBike", activeBike).apply();
         ed.putInt("lastHowManyFuels", lastHowManyFuels).apply();
+        ed.putInt("warningDays", warningDays).apply();
+        ed.putInt("notiHour", notiHour).apply();
+        ed.putInt("notiMinute", notiMinute).apply();
         ed.putInt("locationUpdatesTime", locationUpdatesTime).apply();
         ed.putBoolean("incCarEvents", incCarEvents).apply();
         ed.putBoolean("incBikeEvents", incBikeEvents).apply();
         ed.putBoolean("backgroundsWanted", backgroundsWanted).apply();
+        ed.putBoolean("notificationsWanted", notificationsWanted).apply();
         ed.putBoolean("locationAccepted", locationAccepted).apply();
         ed.putBoolean("storageAccepted", storageAccepted).apply();
         ed.putBoolean("updateNeeded3", updateNeeded).apply();
@@ -794,6 +935,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        nextNotification(this);
         super.onDestroy();
 //        SendLogcatMail();
     }

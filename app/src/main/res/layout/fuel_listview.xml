@@ -25,6 +25,7 @@
         android:layout_marginStart="4dp"
         android:layout_weight="1"
         android:text="Miles"
+        android:textColor="@color/colorGrey"
         android:textSize="24sp" />
 
     <TextView

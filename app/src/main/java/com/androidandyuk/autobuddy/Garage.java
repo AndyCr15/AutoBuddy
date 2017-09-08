@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -25,7 +26,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -107,8 +107,9 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
     public static View getDetailsView;
     public static Boolean editingBike = false;
 
-    TextView bikeTitle;
+    //    TextView bikeTitle;
     EditText bikeNotes;
+    TextView toolbarTitle;
 
     String detail;
 
@@ -161,7 +162,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
         shield = (ImageView) findViewById(R.id.shield);
 
-        taxDue.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, TaxDue.values()));
+        taxDue.setAdapter(new ArrayAdapter<>(this, R.layout.spinner_item_regular, TaxDue.values()));
 
         if (activeBike > -1) {
             int thisTax = getEnumPos(bikes.get(activeBike).taxDue);
@@ -228,12 +229,12 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10800000, 1000, locationListener);
 
-            Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-            Log.i("lastKnownLocation", "" + lastKnownLocation);
-            if (lastKnownLocation != null) {
-                user.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
-            }
+        Log.i("lastKnownLocation", "" + lastKnownLocation);
+        if (lastKnownLocation != null) {
+            user.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
+        }
 
         if (user.location != null) {
             //change this to be users location
@@ -246,17 +247,15 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
         }
 
-
-
-
-
-
-
-
-
-
-
-
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        toolbarTitle = (TextView) findViewById(R.id.toolbar_title);
+        toolbarTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // DO SOMETHING HERE
+                nextBike(view);
+            }
+        });
 
 
 
@@ -369,9 +368,17 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         return 1;
     }
 
-    public void showWeather(){
-        Snackbar.make(findViewById(R.id.main), "Today's Forecast is : " + currentForecast, Snackbar.LENGTH_SHORT)
-                .setAction("Action", null).show();
+    public void showWeather() {
+        Snackbar.make(findViewById(R.id.main), "Today's Forecast is : " + currentForecast, Snackbar.LENGTH_LONG)
+                .setAction("Open BBC Weather", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String url = "https://m.bbc.co.uk/weather";
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(url));
+                        startActivity(i);
+                    }
+                }).show();
     }
 
     public void setListeners() {
@@ -394,9 +401,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
                 }
             };
 
-            serviceDateSetListener = new DatePickerDialog.OnDateSetListener()
-
-            {
+            serviceDateSetListener = new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                     Log.i("Service Date was: ", bikes.get(activeBike).serviceDue);
@@ -412,7 +417,8 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
     }
 
     public void garageSetup() {
-        bikeTitle = (TextView) findViewById(R.id.bikeTitle);
+        toolbarTitle = (TextView) findViewById(R.id.toolbar_title);
+//        bikeTitle = (TextView) findViewById(R.id.bikeTitle);
 //        regSwitcher = (ViewSwitcher) findViewById(R.id.regSwitcher);
         aveMPG = (TextView) findViewById(R.id.aveMPG);
         bikeEstMileage = (TextView) findViewById(R.id.estMileage);
@@ -425,12 +431,23 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         serviceDue = (TextView) findViewById(R.id.serviceDue);
         taxDue = (Spinner) findViewById(R.id.taxSpinner);
 
+
         setListeners();
         calcEstMileage();
 
         // check the user has a bike, then set all the views to it's current details
         if (bikes.size() > 0) {
-            bikeTitle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
+            toolbarTitle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
+//            bikeTitle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            View headerView = navigationView.getHeaderView(0);
+            TextView navMake = (TextView) headerView.findViewById(R.id.nav_tv_make);
+            navMake.setText(bikes.get(activeBike).make);
+            TextView navModel = (TextView) headerView.findViewById(R.id.nav_tv_model);
+            navModel.setText(bikes.get(activeBike).model);
+            TextView navYear = (TextView) headerView.findViewById(R.id.nav_tv_year);
+            navYear.setText(bikes.get(activeBike).yearOfMan);
 
             Log.i("Active Bike Reg", " " + (bikes.get(activeBike).registration));
 
@@ -493,7 +510,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
             if (MainActivity.checkInRange(bikes.get(activeBike).MOTdue, testDate)) {
                 MOTdue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_red));
             } else {
-                MOTdue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey_orange));
+                MOTdue.setBackground(null);
             }
 //            }
 
@@ -505,7 +522,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
             if (MainActivity.checkInRange(bikes.get(activeBike).serviceDue, testDate)) {
                 serviceDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_red));
             } else {
-                serviceDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey_orange));
+                serviceDue.setBackground(null);
             }
 
             // check Tax is due this month
@@ -517,15 +534,15 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
             if (currentMonth == taxMonth) {
                 taxDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_red));
             } else {
-                taxDue.setBackground(getResources().getDrawable(R.drawable.rounded_corners_grey_orange));
+                taxDue.setBackground(null);
             }
-            bikeTitle.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    editBike();
-                    return true;
-                }
-            });
+//            bikeTitle.setOnLongClickListener(new View.OnLongClickListener() {
+//                @Override
+//                public boolean onLongClick(View v) {
+//                    editBike();
+//                    return true;
+//                }
+//            });
         }
     }
 
@@ -726,10 +743,10 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
     }
 
-    public void nextBike(View view){
-        Log.i("Next Bike","activeBike " + activeBike);
+    public void nextBike(View view) {
+        Log.i("Next Bike", "activeBike " + activeBike);
         activeBike++;
-        if(activeBike > (bikes.size()-1)){
+        if (activeBike > (bikes.size() - 1)) {
             activeBike = 0;
         }
         garageSetup();
@@ -778,7 +795,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
                 }
 
-                Log.i("Adding Bike","Global Code");
+                Log.i("Adding Bike", "Global Code");
                 // hide keyboard
                 View viewAddBike = this.getCurrentFocus();
                 if (viewAddBike != null) {
@@ -920,96 +937,96 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         saveBikes();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.bike_choice, menu);
-        super.onCreateOptionsMenu(menu);
-
-        menu.add(0, 0, 0, "Settings").setShortcut('3', 'c');
-        int i;
-        for (i = 0; i < bikes.size(); i++) {
-            String bikeMakeMenu = bikes.get(i).model;
-            menu.add(0, i + 1, 0, bikeMakeMenu).setShortcut('3', 'c');
-        }
-        menu.add(0, 10, 0, "Annual Reports").setShortcut('3', 'c');
-        menu.add(0, 11, 0, "Delete Vehicle").setShortcut('3', 'c');
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        changingBikes();
-        if (activeBike > -1) {
-            // save any changes in Bike notes
-            bikeNotes = (EditText) findViewById(R.id.bikeNotes);
-            bikes.get(activeBike).notes = bikeNotes.getText().toString();
-        }
-        // change to bike selected
-        switch (item.getItemId()) {
-            case 0:
-                Log.i("Option", "0");
-                Intent intent = new Intent(getApplicationContext(), Settings.class);
-                startActivity(intent);
-//                Toast.makeText(MainActivity.this, "Settings not yet implemented", Toast.LENGTH_LONG).show();
-                return true;
-            case 1:
-                Log.i("Option", "2");
-                activeBike = 0;
-                garageSetup();
-                return true;
-            case 2:
-                Log.i("Option", "2");
-                activeBike = 1;
-                garageSetup();
-                return true;
-            case 3:
-                Log.i("Option", "3");
-                activeBike = 2;
-                garageSetup();
-                return true;
-            case 4:
-                Log.i("Option", "4");
-                activeBike = 3;
-                garageSetup();
-                return true;
-            case 5:
-                Log.i("Option", "5");
-                activeBike = 4;
-                garageSetup();
-                return true;
-            case 6:
-                Log.i("Option", "6");
-                activeBike = 5;
-                garageSetup();
-                return true;
-            case 7:
-                Log.i("Option", "7");
-                activeBike = 6;
-                garageSetup();
-                return true;
-            case 8:
-                Log.i("Option", "8");
-                activeBike = 7;
-                garageSetup();
-                return true;
-            case 9:
-                Log.i("Option", "9");
-                activeBike = 8;
-                garageSetup();
-                return true;
-            case 10:
-                Log.i("Option", "10");
-                Intent thisIntent = new Intent(getApplicationContext(), AnnualReports.class);
-                startActivity(thisIntent);
-                return true;
-            case 11:
-                Log.i("Option", "11");
-                deleteBike();
-                garageSetup();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.bike_choice, menu);
+//        super.onCreateOptionsMenu(menu);
+//
+//        menu.add(0, 0, 0, "Settings").setShortcut('3', 'c');
+//        int i;
+//        for (i = 0; i < bikes.size(); i++) {
+//            String bikeMakeMenu = bikes.get(i).model;
+//            menu.add(0, i + 1, 0, bikeMakeMenu).setShortcut('3', 'c');
+//        }
+//        menu.add(0, 10, 0, "Annual Reports").setShortcut('3', 'c');
+//        menu.add(0, 11, 0, "Delete Vehicle").setShortcut('3', 'c');
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        changingBikes();
+//        if (activeBike > -1) {
+//            // save any changes in Bike notes
+//            bikeNotes = (EditText) findViewById(R.id.bikeNotes);
+//            bikes.get(activeBike).notes = bikeNotes.getText().toString();
+//        }
+//        // change to bike selected
+//        switch (item.getItemId()) {
+//            case 0:
+//                Log.i("Option", "0");
+//                Intent intent = new Intent(getApplicationContext(), Settings.class);
+//                startActivity(intent);
+////                Toast.makeText(MainActivity.this, "Settings not yet implemented", Toast.LENGTH_LONG).show();
+//                return true;
+//            case 1:
+//                Log.i("Option", "2");
+//                activeBike = 0;
+//                garageSetup();
+//                return true;
+//            case 2:
+//                Log.i("Option", "2");
+//                activeBike = 1;
+//                garageSetup();
+//                return true;
+//            case 3:
+//                Log.i("Option", "3");
+//                activeBike = 2;
+//                garageSetup();
+//                return true;
+//            case 4:
+//                Log.i("Option", "4");
+//                activeBike = 3;
+//                garageSetup();
+//                return true;
+//            case 5:
+//                Log.i("Option", "5");
+//                activeBike = 4;
+//                garageSetup();
+//                return true;
+//            case 6:
+//                Log.i("Option", "6");
+//                activeBike = 5;
+//                garageSetup();
+//                return true;
+//            case 7:
+//                Log.i("Option", "7");
+//                activeBike = 6;
+//                garageSetup();
+//                return true;
+//            case 8:
+//                Log.i("Option", "8");
+//                activeBike = 7;
+//                garageSetup();
+//                return true;
+//            case 9:
+//                Log.i("Option", "9");
+//                activeBike = 8;
+//                garageSetup();
+//                return true;
+//            case 10:
+//                Log.i("Option", "10");
+//                Intent thisIntent = new Intent(getApplicationContext(), AnnualReports.class);
+//                startActivity(thisIntent);
+//                return true;
+//            case 11:
+//                Log.i("Option", "11");
+//                deleteBike();
+//                garageSetup();
+//                return true;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
     @Override
     public void onBackPressed() {
@@ -1120,12 +1137,12 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
             Intent intent = new Intent(getApplicationContext(), HotSpots.class);
             startActivity(intent);
 
-        }else if (id == R.id.nav_shows) {
+        } else if (id == R.id.nav_shows) {
 
             Intent intent = new Intent(getApplicationContext(), CarShows.class);
             startActivity(intent);
 
-        }else if (id == R.id.nav_traffic) {
+        } else if (id == R.id.nav_traffic) {
 
             Intent intent = new Intent(getApplicationContext(), Traffic.class);
             startActivity(intent);
