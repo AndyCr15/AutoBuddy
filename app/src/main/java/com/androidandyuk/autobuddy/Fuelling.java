@@ -94,6 +94,7 @@ public class Fuelling extends AppCompatActivity {
         setContentView(R.layout.activity_fueling);
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);

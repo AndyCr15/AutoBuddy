@@ -166,7 +166,6 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
         if (activeBike > -1) {
             int thisTax = getEnumPos(bikes.get(activeBike).taxDue);
-            Log.i("onCreate taxDue", bikes.get(activeBike).taxDue + " " + thisTax);
             taxDue.setSelection(thisTax - 1);
         }
 
@@ -256,9 +255,6 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
                 nextBike(view);
             }
         });
-
-
-
 
     }
 
@@ -386,9 +382,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         if (activeBike > -1)
 
         {
-            MOTDateSetListener = new DatePickerDialog.OnDateSetListener()
-
-            {
+            MOTDateSetListener = new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                     Log.i("MOT Date was: ", bikes.get(activeBike).MOTdue);
@@ -449,12 +443,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
             TextView navYear = (TextView) headerView.findViewById(R.id.nav_tv_year);
             navYear.setText(bikes.get(activeBike).yearOfMan);
 
-            Log.i("Active Bike Reg", " " + (bikes.get(activeBike).registration));
-
             myRegView.setText((bikes.get(activeBike).registration));
-
-            Log.i("garageSetup taxDue", bikes.get(activeBike).taxDue);
-            Log.i("position", "" + getEnumPos(bikes.get(activeBike).taxDue));
 
             taxDue.setSelection(getEnumPos(bikes.get(activeBike).taxDue) - 1);
 
@@ -744,6 +733,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
     }
 
     public void nextBike(View view) {
+        changingBikes();
         Log.i("Next Bike", "activeBike " + activeBike);
         activeBike++;
         if (activeBike > (bikes.size() - 1)) {
