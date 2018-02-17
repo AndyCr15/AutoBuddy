@@ -36,7 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static com.androidandyuk.autobuddy.HotSpots.hotspotLocations;
+import static com.androidandyuk.autobuddy.MainActivity.hotspotLocations;
 import static com.androidandyuk.autobuddy.MainActivity.backgroundsWanted;
 import static com.androidandyuk.autobuddy.MainActivity.jsonObject;
 import static com.androidandyuk.autobuddy.MainActivity.userLatLng;
@@ -82,9 +82,9 @@ public class LocationInfoActivity extends FragmentActivity implements OnMapReady
 
         Log.i("Location Info Activity", "On Map Ready");
 
-        EditText locationName = (EditText) findViewById(R.id.locationName);
-        EditText locationAddress = (EditText) findViewById(R.id.locationAddress);
-        EditText locationComment = (EditText) findViewById(R.id.locationComment);
+        EditText locationName = findViewById(R.id.locationName);
+        EditText locationAddress = findViewById(R.id.locationAddress);
+        EditText locationComment = findViewById(R.id.locationComment);
 
         // read in the reason the map has been called
         Intent intent = getIntent();
@@ -145,7 +145,7 @@ public class LocationInfoActivity extends FragmentActivity implements OnMapReady
                 Log.i("Show selected", "" + temp.name);
                 locationName.setText(temp.name);
                 locationAddress.setText(temp.address);
-                String comment = temp.comment + "\n\nStarting " + temp.start + " and ends " + temp.end + ".\n\nWebsite : [" + temp.url + "]";
+                String comment = "Starting " + temp.start + " and ends " + temp.end + ".\n\n" +temp.comment + "\n\nWebsite : [" + temp.url + "]";
 
                 // make the website url clickable
                 // whatever is between [ and ] is made clickable

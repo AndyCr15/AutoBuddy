@@ -1,10 +1,12 @@
 package com.androidandyuk.autobuddy;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,9 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -51,10 +54,16 @@ public class CarShows extends AppCompatActivity {
     static MyLocationAdapter myAdapter;
 
     boolean updatedRecently = false;
+    // Sort Order - True = done by nearest
+    public static boolean sortShowsOrder = true;
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
-    public static RelativeLayout main;
+    public static LinearLayout main;
+
+    private SwipeRefreshLayout swipeContainer;
+
+    private ProgressDialog pDialog;
 
     ListView listView;
 
@@ -69,6 +78,8 @@ public class CarShows extends AppCompatActivity {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         Log.i("Car Shows", "onCreate");
+
+        pDialog = new ProgressDialog(CarShows.this);
 
         listView = (ListView) findViewById(R.id.listShows);
 
@@ -90,41 +101,66 @@ public class CarShows extends AppCompatActivity {
 
         });
 
+        // Lookup the swipe container view
+        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        // Setup refresh listener which triggers new data loading
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                //fetchTimelineAsync(0);
+                updateShows();
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+
         // the location of the shows xml file
         carUrl = jsonLocation + "carshows.json";
         bikeUrl = jsonLocation + "bikeshows.json";
 
         // check if shows have been loaded already
-        if (updatedRecently) {
-            loadShows();
-        } else {
+        if (!updatedRecently) {
             updateShows();
         }
 
         checkBackground();
     }
 
-    public void updateShowsButton(View view) {
-        updateShows();
+    public void toggleSortOrder(View view) {
+        sortShowsOrder = !sortShowsOrder;
+        if (sortShowsOrder) {
+            Toast.makeText(this, "Sorting by locality", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Sorting soonest first", Toast.LENGTH_SHORT).show();
+        }
+        sortMyList();
     }
 
     public void updateShows() {
         updatedRecently = true;
         carShows.clear();
         // get the data
-        if(incCarEvents) {
+        if (incCarEvents) {
             new MyAsyncTaskgetNews().execute(carUrl);
         }
-        if(incBikeEvents) {
+        if (incBikeEvents) {
             new MyAsyncTaskgetNews().execute(bikeUrl);
         }
         saveShows();
+
     }
 
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(R.id.main);
-        if(backgroundsWanted){
-            int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
+        main = (LinearLayout) findViewById(R.id.main);
+        if (backgroundsWanted) {
+            int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
             CarShows.main.setBackground(drawablePic);
             listView.setBackground(getResources().getDrawable(R.drawable.rounded_corners_drkgrey_orange));
@@ -138,6 +174,9 @@ public class CarShows extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             //before works
+            if (!pDialog.isShowing()) {
+                startLoading();
+            }
         }
 
         @Override
@@ -194,8 +233,9 @@ public class CarShows extends AppCompatActivity {
 
         protected void onPostExecute(String result2) {
             sortMyList();
+            stopLoading();
+            swipeContainer.setRefreshing(false);
         }
-
 
     }
 
@@ -250,13 +290,13 @@ public class CarShows extends AppCompatActivity {
 
             final markedLocation s = locationDataAdapter.get(position);
 
-            TextView milesKM = (TextView)myView.findViewById(R.id.milesKM);
+            TextView milesKM = myView.findViewById(R.id.milesKM);
             milesKM.setText(milesSetting);
 
-            TextView locationListDistance = (TextView) myView.findViewById(R.id.locationListDistance);
+            TextView locationListDistance = myView.findViewById(R.id.locationListDistance);
             locationListDistance.setText(oneDecimal.format(s.distance));
 
-            TextView locationListName = (TextView) myView.findViewById(R.id.locationListName);
+            TextView locationListName = myView.findViewById(R.id.locationListName);
             locationListName.setText(s.name);
 
             return myView;
@@ -299,29 +339,38 @@ public class CarShows extends AppCompatActivity {
         startActivity(intent);
     }
 
+
     public void sortMyList() {
         Log.i("Sort Shows", "" + carShows.size());
         if (carShows.size() > 0) {
-            Collections.sort(carShows);
+
+            // remove any events that have passed
+            Date today = new Date();
+            Date thisShowEnd = new Date();
+            for (int i = 0; i < carShows.size(); i++) {
+
+                try {
+                    thisShowEnd = sdf.parse(carShows.get(i).end);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                if (today.after(thisShowEnd)) {
+                    carShows.remove(i);
+                    // A show has been removed, so go back one on the counter
+                    i--;
+                }
+            }
+
+            if (sortShowsOrder) {
+                Collections.sort(carShows);
+            } else {
+                Collections.sort(carShows, new CustomComparator());
+            }
+
+
             myAdapter.notifyDataSetChanged();
         }
-
-        // remove any events that have passed
-        Date today = new Date();
-        Date thisShowEnd = new Date();
-        for (int i = 0; i < carShows.size(); i++) {
-
-            try {
-                thisShowEnd = sdf.parse(carShows.get(i).end);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-            if (today.after(thisShowEnd)) {
-                carShows.remove(i);
-            }
-        }
-
     }
 
     public void saveShows() {
@@ -417,6 +466,21 @@ public class CarShows extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    public void startLoading() {
+
+        pDialog.setMessage("Please wait...");
+        pDialog.setCancelable(false);
+        pDialog.show();
+    }
+
+    public void stopLoading() {
+        // Dismiss the progress dialog
+        if (pDialog.isShowing()) {
+            pDialog.dismiss();
+        }
+
     }
 
     @Override

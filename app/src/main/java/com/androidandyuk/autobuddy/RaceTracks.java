@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -12,10 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -38,7 +39,6 @@ import static com.androidandyuk.autobuddy.MainActivity.ed;
 import static com.androidandyuk.autobuddy.MainActivity.jsonLocation;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
 import static com.androidandyuk.autobuddy.MainActivity.oneDecimal;
-import static com.androidandyuk.autobuddy.MainActivity.sharedPreferences;
 
 public class RaceTracks extends AppCompatActivity {
     static List<markedLocation> trackLocations = new ArrayList<>();
@@ -46,8 +46,12 @@ public class RaceTracks extends AppCompatActivity {
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
-    public static RelativeLayout main;
+    public static LinearLayout main;
     ListView listView;
+
+    private SwipeRefreshLayout swipeContainer;
+
+    //private ProgressDialog pDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,13 +82,35 @@ public class RaceTracks extends AppCompatActivity {
 
         });
 
-        loadTracks();
-
-        Long lastUpdated = Long.parseLong(sharedPreferences.getString("tracksUpdated", "0"));
-        Long sinceUpdated = (System.currentTimeMillis() - lastUpdated)/1000;
-        if(trackLocations.size() == 0 || sinceUpdated > 5200000) {
-            new MyAsyncTaskgetNews().execute(jsonLocation + "racetracks.json");
+        Log.i("trackLocations","Size " + trackLocations.size());
+        if(trackLocations.size()<1) {
+            Toast.makeText(this, "Currently loading tracks. Come back in a few seconds.", Toast.LENGTH_LONG).show();
         }
+
+        // Lookup the swipe container view
+        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        // Setup refresh listener which triggers new data loading
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                //fetchTimelineAsync(0);
+                new MyAsyncTaskgetNews().execute(jsonLocation + "racetracks.json");
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+//        Long lastUpdated = Long.parseLong(sharedPreferences.getString("tracksUpdated", "0"));
+//        Long sinceUpdated = (System.currentTimeMillis() - lastUpdated)/1000;
+//        if(trackLocations.size() == 0 || sinceUpdated > 5200000) {
+//            new MyAsyncTaskgetNews().execute(jsonLocation + "racetracks.json");
+//        }
 
     }
 
@@ -150,7 +176,7 @@ public class RaceTracks extends AppCompatActivity {
     }
 
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(R.id.main);
+        main = (LinearLayout) findViewById(R.id.main);
         if(backgroundsWanted){
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
@@ -167,8 +193,9 @@ public class RaceTracks extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             //before works
-            ImageView loading = (ImageView) findViewById(R.id.loadingShield);
-            loading.setVisibility(View.VISIBLE);
+            //startLoading();
+//            ImageView loading = (ImageView) findViewById(R.id.loadingShield);
+//            loading.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -223,10 +250,11 @@ public class RaceTracks extends AppCompatActivity {
 
         protected void onPostExecute(String result2) {
             sortMyList();
-            ImageView loading = (ImageView) findViewById(R.id.loadingShield);
-            loading.setVisibility(View.INVISIBLE);
+//            ImageView loading = (ImageView) findViewById(R.id.loadingShield);
+//            loading.setVisibility(View.INVISIBLE);
             saveTracks();
             ed.putString("tracksUpdated", Long.toString(System.currentTimeMillis())).apply();
+            swipeContainer.setRefreshing(false);
         }
     }
 
@@ -281,43 +309,18 @@ public class RaceTracks extends AppCompatActivity {
         }
     }
 
-    public static void loadTracks() {
-
-        trackLocations.clear();
-
-        Log.i("Loading", "Tracks");
-
-        ArrayList<String> trName = new ArrayList<>();
-        ArrayList<String> trComment = new ArrayList<>();
-        ArrayList<String> trLat = new ArrayList<>();
-        ArrayList<String> trLon = new ArrayList<>();
-        
-        try {
-
-            trName = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("trName", ObjectSerializer.serialize(new ArrayList<String>())));
-            trComment = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("trComment", ObjectSerializer.serialize(new ArrayList<String>())));
-            trLat = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("trLat", ObjectSerializer.serialize(new ArrayList<String>())));
-            trLon = (ArrayList<String>) ObjectSerializer.deserialize(sharedPreferences.getString("trLon", ObjectSerializer.serialize(new ArrayList<String>())));
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.i("Loading Tracks", "Failed attempt");
-        }
-
-        if (trName.size() > 0 && trComment.size() > 0 && trLat.size() > 0) {
-            // we've checked there is some info
-            if (trName.size() == trComment.size() && trComment.size() == trLat.size()) {
-                // we've checked each item has the same amount of info, nothing is missing
-                for (int x = 0; x < trName.size(); x++) {
-                    Double lat = Double.parseDouble(trLat.get(x));
-                    Double lon = Double.parseDouble(trLon.get(x));
-                    LatLng thisLocation = new LatLng(lat, lon);
-                    trackLocations.add(new markedLocation(trName.get(x), thisLocation, trComment.get(x)));
-                }
-            }
-        }
-    }
-    
+//    public void startLoading() {
+//        pDialog = new ProgressDialog(RaceTracks.this);
+//        pDialog.setMessage("Please wait...");
+//        pDialog.setCancelable(false);
+//        pDialog.show();
+//    }
+//
+//    public void stopLoading() {
+//        // Dismiss the progress dialog
+//        if (pDialog.isShowing())
+//            pDialog.dismiss();
+//    }
     
     @Override
     public void onBackPressed() {

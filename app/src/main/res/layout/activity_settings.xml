@@ -49,7 +49,7 @@
                         android:id="@+id/textView139"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Notificaions wanted"
+                        android:text="Notifications wanted"
                         android:textColor="@color/colorGrey" />
 
                     <Switch
@@ -433,6 +433,15 @@
                 android:onClick="goToAbout"
                 android:padding="4dp"
                 android:text="About" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:background="@drawable/rounded_corners_primary"
+                android:onClick="resetInstructions"
+                android:padding="4dp"
+                android:text="Reset Instructions" />
         </LinearLayout>
 
         <ImageView

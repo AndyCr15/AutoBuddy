@@ -9,15 +9,6 @@
         <item name="android:windowBackground">@color/background</item>
         <item name="android:navigationBarColor">@color/colorPrimary</item>
         <item name="android:actionBarSize">50dp</item>
-        <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
-    </style>
-
-    <style name="RobotoTextViewStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">@font/roboto</item>
-    </style>
-
-    <style name="RobotoButtonStyle" parent="android:Widget.Holo.Button">
-        <item name="android:fontFamily">@font/roboto</item>
     </style>
 
     <style name="SettingsTheme" parent="Theme.AppCompat.Light.DarkActionBar">

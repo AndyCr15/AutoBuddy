@@ -35,7 +35,7 @@ import java.util.Locale;
 
 import static com.androidandyuk.autobuddy.CarShows.carShows;
 import static com.androidandyuk.autobuddy.Favourites.favouriteLocations;
-import static com.androidandyuk.autobuddy.HotSpots.hotspotLocations;
+import static com.androidandyuk.autobuddy.MainActivity.hotspotLocations;
 import static com.androidandyuk.autobuddy.MainActivity.geocoder;
 import static com.androidandyuk.autobuddy.MainActivity.locationListener;
 import static com.androidandyuk.autobuddy.MainActivity.locationManager;

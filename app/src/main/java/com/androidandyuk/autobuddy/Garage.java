@@ -96,6 +96,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
     TextView milesDone;
     TextView bikeEstMileage;
     TextView costPerMile;
+    TextView totalSpent;
     TextView myRegView;
     TextView MOTdue;
     TextView serviceDue;
@@ -412,11 +413,10 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
     public void garageSetup() {
         toolbarTitle = (TextView) findViewById(R.id.toolbar_title);
-//        bikeTitle = (TextView) findViewById(R.id.bikeTitle);
-//        regSwitcher = (ViewSwitcher) findViewById(R.id.regSwitcher);
         aveMPG = (TextView) findViewById(R.id.aveMPG);
         bikeEstMileage = (TextView) findViewById(R.id.estMileage);
         costPerMile = (TextView) findViewById(R.id.costPerMile);
+        totalSpent = (TextView) findViewById(R.id.totalSpent);
         bikeNotes = (EditText) findViewById(R.id.bikeNotes);
         bikeNotes.setSelected(false);
         myRegView = (TextView) findViewById(R.id.clickable_reg_view);
@@ -476,6 +476,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
                 distance = distance / conversion;
             }
             costPerMile.setText(currencySetting + precision.format((maintSpentSince(lastYear) + petrolSpentSince(lastYear)) / distance));
+            totalSpent.setText(currencySetting + precision.format(maintSpentSince(lastYear) + petrolSpentSince(lastYear)));
 
             aveMPG.setText(precision.format(milesSince(lastYear) / (litresSince(lastYear) / 4.54609)));
 

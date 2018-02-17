@@ -380,6 +380,10 @@ public class Settings extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void resetInstructions(View view){
+        ed.putBoolean("instructionsRead", false).apply();
+    }
+
     // get fuels from fuelio
     public class MyAsyncTaskFuels extends AsyncTask<String, String, String> {
         @Override

@@ -1,57 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_portrait"
+    android:orientation="vertical"
     android:scaleType="fitXY"
     tools:context=".RaceTracks">
-
-    <ImageView
-        android:id="@+id/loadingShield"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="fitXY"
-        android:visibility="invisible"
-        app:srcCompat="@drawable/loading_shield" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:orientation="vertical">
 
-        <ListView
-            android:id="@+id/listTracks"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipeContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_weight="1"
-            android:alpha="0.8"
-            android:background="@drawable/rounded_corners_drkgrey_orange"
-            android:dividerHeight="5dp" />
+            android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/seeTracksMaps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_weight="0"
-            android:background="@drawable/rounded_corners"
-            android:onClick="viewTracks"
-            android:text="View All Tracks"
-            android:textColor="@android:color/white" />
+            <ListView
+                android:id="@+id/listTracks"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                android:alpha="0.8"
+                android:background="@drawable/rounded_corners_drkgrey_orange"
+                android:dividerHeight="5dp" />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
     </LinearLayout>
 
-</RelativeLayout>
+    <Button
+        android:id="@+id/seeTracksMaps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="0"
+        android:background="@drawable/rounded_corners"
+        android:onClick="viewTracks"
+        android:text="View All Tracks"
+        android:textColor="@android:color/white" />
+
+</LinearLayout>

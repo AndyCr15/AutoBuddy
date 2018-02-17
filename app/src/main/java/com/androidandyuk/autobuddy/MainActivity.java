@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.backup.BackupManager;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import static com.androidandyuk.autobuddy.CarShows.loadShows;
+//import static com.androidandyuk.autobuddy.CarShows.loadShows;
 import static com.androidandyuk.autobuddy.Fuelling.loadFuels;
 import static com.androidandyuk.autobuddy.Fuelling.loadFuelsOld;
 import static com.androidandyuk.autobuddy.Fuelling.saveFuels;
@@ -102,9 +103,13 @@ public class MainActivity extends AppCompatActivity {
     public static boolean backgroundsWanted;
     public static boolean notificationsWanted;
 
+    static ArrayList<markedLocation> hotspotLocations = new ArrayList<>();
+
     public static SQLiteDatabase vehiclesDB;
 
     public static String userLocationForWeather;
+
+    public static ProgressDialog pDialog;
 
     public static final DecimalFormat precision = new DecimalFormat("0.00");
     public static final DecimalFormat oneDecimal = new DecimalFormat("0.#");
@@ -162,13 +167,17 @@ public class MainActivity extends AppCompatActivity {
             updateNeeded = false;
             ed.putBoolean("updateNeeded3", false).apply();
             saveBikes();
-            loadShows();
+            new LoadShows().execute();
+            new LoadTracks().execute();
+            new LoadHotSpots().execute(jsonLocation + "hotspots.json");
         } else {
             loadBikes();
             loadFuels();
             loadLogs();
             loadToDos();
-            loadShows();
+            new LoadShows().execute();
+            new LoadTracks().execute();
+            new LoadHotSpots().execute(jsonLocation + "hotspots.json");
         }
         checkMOTwarning();
         checkServiceWarning();

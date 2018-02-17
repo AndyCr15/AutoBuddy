@@ -1,6 +1,7 @@
 package com.androidandyuk.autobuddy;
 
 import android.app.DownloadManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -18,8 +20,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +49,9 @@ public class Traffic extends AppCompatActivity {
     static MyTrafficAdapter myAdapter;
     ListView trafficList;
 
-    public static RelativeLayout main;
+    public static LinearLayout main;
+
+    private SwipeRefreshLayout swipeContainer;
 
     private DownloadManager downloadManager;
     public static long downloadId;
@@ -60,6 +64,8 @@ public class Traffic extends AppCompatActivity {
     public static int lastTrafficUpdateMins;
 //    public long secondsSinceUpdate;
 
+    private ProgressDialog pDialog;
+
     private volatile boolean done;
 
     @Override
@@ -69,6 +75,24 @@ public class Traffic extends AppCompatActivity {
 
         IntentFilter intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         registerReceiver(new DownloadReceiver(), intentFilter);
+
+        // Lookup the swipe container view
+        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        // Setup refresh listener which triggers new data loading
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                forceUpdate();
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
         setTitle("Traffic");
 
@@ -97,6 +121,10 @@ public class Traffic extends AppCompatActivity {
 //            updateTraffic = false;
         } else if (!MainActivity.storageAccepted) {
             Toast.makeText(this, "Permissions to save the data to your Downloads folder is needed to receive traffic information", Toast.LENGTH_LONG).show();
+        }
+
+        if(trafficEvents.size()<1){
+            Toast.makeText(this, "Pull down to refresh.", Toast.LENGTH_LONG).show();
         }
 
     }
@@ -215,7 +243,7 @@ public class Traffic extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void forceUpdate(View view) {
+    public void forceUpdate() {
         updateTraffic = true;
         if (updateTraffic && MainActivity.storageAccepted) {
             downloadTraffic();
@@ -239,6 +267,8 @@ public class Traffic extends AppCompatActivity {
 
     private void downloadFile(Uri uri) {
         Log.i("Traffic", "downloadFile");
+
+        startLoading();
 
         // delete the old file before downloading a new one
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + File.separator +
@@ -264,7 +294,8 @@ public class Traffic extends AppCompatActivity {
             if (refId == downloadId) {
                 Toast.makeText(context, "Traffic File Updated", Toast.LENGTH_SHORT).show();
                 parseList();
-//                initiateList();
+                stopLoading();
+                swipeContainer.setRefreshing(false);
             }
         }
     }
@@ -285,8 +316,21 @@ public class Traffic extends AppCompatActivity {
 
     }
 
+    public void startLoading() {
+        pDialog = new ProgressDialog(Traffic.this);
+        pDialog.setMessage("Please wait...");
+        pDialog.setCancelable(false);
+        pDialog.show();
+    }
+
+    public void stopLoading() {
+        // Dismiss the progress dialog
+        if (pDialog.isShowing())
+            pDialog.dismiss();
+    }
+
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
+        main = (LinearLayout) findViewById(com.androidandyuk.autobuddy.R.id.main);
         if(backgroundsWanted){
             int resID = getResources().getIdentifier("background_portrait", "drawable",  this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
