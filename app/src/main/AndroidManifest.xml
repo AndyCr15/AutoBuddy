@@ -6,29 +6,32 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="fractal5.mythirdapp.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <application
         android:name=".App"
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:backupAgent=".MyBackupAgent"
+        android:restoreAnyVersion="true"
         android:logo="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyA4vYP7mT2iF0s_XZGF9tTDzL381DbaLTk" />
-        <!-- <meta-data -->
-        <!-- android:name="com.google.android.backup.api_key" -->
-        <!-- android:value="AEdPqrEAAAAILBrSZaiKBIa1ylQupITalbvc9ZFsfI-Nvl-jiw" /> -->
+            android:value="AIzaSyA4vYP7mT2iF0s_XZGF9tTDzL381DbaLTk"/>
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1536383980369976~4270784646" />
+        <meta-data
+            android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAIhcaN3V2hOOXVfcCaDYfeF8BcB79jUDq31mY_yQ" />
 
         <activity
             android:name=".MainActivity"
@@ -39,7 +42,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".Favourites"
             android:label="Favourites"
@@ -74,7 +76,7 @@
             android:name=".Fuelling"
             android:label="Fueling"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".Garage"
             android:label="Garage"
@@ -112,8 +114,7 @@
         <activity
             android:name=".Settings"
             android:label="Settings" />
-        <activity
-            android:name=".AnnualReports"/>
+        <activity android:name=".AnnualReports" />
 
         <receiver android:name=".NotificationReceiver" />
         <receiver
@@ -122,9 +123,15 @@
             android:exported="true">
             <intent-filter android:priority="500">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name=".ChooseVehicle"
+            android:label="@string/title_activity_choose_vehicle"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

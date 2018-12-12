@@ -58,7 +58,7 @@ public class AnnualReports extends AppCompatActivity {
 
         changeHeader();
 
-        Spinner reportChoice = (Spinner) findViewById(R.id.reportChoice);
+        Spinner reportChoice = findViewById(R.id.reportChoice);
 
         List<String> spinnerArray = new ArrayList<>();
         spinnerArray.add("Fuel");
@@ -235,9 +235,9 @@ public class AnnualReports extends AppCompatActivity {
     }
 
     public void changeHeader() {
-        TextView selectedVehicle = (TextView) findViewById(R.id.selectedVehicle);
+        TextView currentVehicle = (TextView) findViewById(R.id.currentVehicle);
         if (activeBike > -1) {
-            selectedVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
+            currentVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).make + " " + bikes.get(activeBike).model);
         }
         changeReports();
     }

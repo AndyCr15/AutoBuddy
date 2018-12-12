@@ -63,6 +63,7 @@ public class Maintenance extends AppCompatActivity {
 
     TextView setLogDate;
     EditText search;
+    TextView currentVehicle;
 
     String searchItem = "";
 
@@ -86,6 +87,9 @@ public class Maintenance extends AppCompatActivity {
 
         loadLogs();
         initiateList();
+
+        currentVehicle = findViewById(R.id.currentVehicle);
+        currentVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).make + " " + bikes.get(activeBike).model);
 
         maintList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -132,7 +136,7 @@ public class Maintenance extends AppCompatActivity {
 
         });
 
-        search = (EditText) findViewById(searchBox);
+        search = findViewById(searchBox);
         search.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

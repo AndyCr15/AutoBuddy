@@ -1,5 +1,6 @@
 package com.androidandyuk.autobuddy;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,9 +16,11 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -46,16 +49,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import static com.androidandyuk.autobuddy.Fuelling.loadFuels;
@@ -66,6 +76,7 @@ import static com.androidandyuk.autobuddy.MainActivity.conversion;
 import static com.androidandyuk.autobuddy.MainActivity.currencySetting;
 import static com.androidandyuk.autobuddy.MainActivity.currentForecast;
 import static com.androidandyuk.autobuddy.MainActivity.jsonObject;
+import static com.androidandyuk.autobuddy.MainActivity.loadBikes;
 import static com.androidandyuk.autobuddy.MainActivity.locationListener;
 import static com.androidandyuk.autobuddy.MainActivity.locationManager;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
@@ -83,7 +94,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "GarageActivity";
 
     private AdView mAdView;
 
@@ -108,6 +119,11 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
     public static View getDetailsView;
     public static Boolean editingBike = false;
 
+    private static final int CHOOSE_FILE_REQUESTCODE = 1;
+
+    private static final int WRITE_REQUEST_CODE = 2;
+    private static final int READ_REQUEST_CODE = 3;
+
     //    TextView bikeTitle;
     EditText bikeNotes;
     TextView toolbarTitle;
@@ -127,16 +143,16 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         // until I implement landscape view, lock the orientation
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
 //        if (bikes.size() == 0) {
@@ -248,12 +264,15 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         }
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        toolbarTitle = (TextView) findViewById(R.id.toolbar_title);
+        toolbarTitle = findViewById(R.id.toolbar_title);
         toolbarTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // DO SOMETHING HERE
-                nextBike(view);
+                if(activeBike > -1) {
+                    nextBike(view);
+                } else {
+                    Toast.makeText(Garage.this, "Add vehicles to your garage, then tap here to rota through them", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -431,6 +450,9 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
         // check the user has a bike, then set all the views to it's current details
         if (bikes.size() > 0) {
+            if(activeBike < 0) {
+                activeBike=0;
+            }
             toolbarTitle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
 //            bikeTitle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).model);
 
@@ -537,7 +559,7 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
     }
 
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(R.id.main);
+        main = findViewById(R.id.main);
         if (backgroundsWanted) {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);
@@ -720,17 +742,18 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         }
     }
 
-    public void addBike(View view) {
-        Log.i("Bike", "Add bike");
+    public void showNew(View view) {
+        if (activeBike > -1) {
+            addingBikeInfo.setVisibility(View.VISIBLE);
+            shield.setVisibility(View.VISIBLE);
+        } else {
+            Toast.makeText(this, "Add bikes in the Garage", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        // clear out any previous details
-        bikeMake.setText("");
-        bikeModel.setText("");
-        bikeYear.setText("");
-
-        addingBikeInfo.setVisibility(View.VISIBLE);
-        shield.setVisibility(View.VISIBLE);
-
+    public void hideNew(){
+        addingBikeInfo.setVisibility(View.INVISIBLE);
+        shield.setVisibility(View.INVISIBLE);
     }
 
     public void nextBike(View view) {
@@ -875,34 +898,6 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         });
     }
 
-    public void goToMaintenanceLog(View view) {
-        if (activeBike > -1) {
-            Intent intent = new Intent(getApplicationContext(), Maintenance.class);
-            startActivity(intent);
-        }
-    }
-
-    public void goToPartsLog(View view) {
-        if (activeBike > -1) {
-            Intent intent = new Intent(getApplicationContext(), PartsLog.class);
-            startActivity(intent);
-        }
-    }
-
-    public void goToToDo(View view) {
-        if (activeBike > -1) {
-            Intent intent = new Intent(getApplicationContext(), ToDo.class);
-            startActivity(intent);
-        }
-    }
-
-    public void goToFuelling(View view) {
-        if (activeBike > -1) {
-            Intent intent = new Intent(getApplicationContext(), Fuelling.class);
-            startActivity(intent);
-        }
-    }
-
     public void cantSetMileage(View view) {
         Toast.makeText(Garage.this, "Mileage is determined from entries in logs and fuel ups, not set here", Toast.LENGTH_LONG).show();
     }
@@ -916,10 +911,10 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
     }
 
     public void changingBikes() {
-        taxDue = (Spinner) findViewById(R.id.taxSpinner);
+        taxDue = findViewById(R.id.taxSpinner);
         String thisTaxDue = taxDue.getSelectedItem().toString();
         Log.i("Changing Bikes taxDue", thisTaxDue);
-        bikeNotes = (EditText) findViewById(R.id.bikeNotes);
+        bikeNotes = findViewById(R.id.bikeNotes);
         // check there's actually a bike before saving the notes
         if (bikeNotes != null && bikes.size() > 0) {
             bikes.get(activeBike).notes = bikeNotes.getText().toString();
@@ -928,96 +923,247 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
         saveBikes();
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.bike_choice, menu);
-//        super.onCreateOptionsMenu(menu);
-//
-//        menu.add(0, 0, 0, "Settings").setShortcut('3', 'c');
-//        int i;
-//        for (i = 0; i < bikes.size(); i++) {
-//            String bikeMakeMenu = bikes.get(i).model;
-//            menu.add(0, i + 1, 0, bikeMakeMenu).setShortcut('3', 'c');
-//        }
-//        menu.add(0, 10, 0, "Annual Reports").setShortcut('3', 'c');
-//        menu.add(0, 11, 0, "Delete Vehicle").setShortcut('3', 'c');
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        changingBikes();
-//        if (activeBike > -1) {
-//            // save any changes in Bike notes
-//            bikeNotes = (EditText) findViewById(R.id.bikeNotes);
-//            bikes.get(activeBike).notes = bikeNotes.getText().toString();
-//        }
-//        // change to bike selected
-//        switch (item.getItemId()) {
-//            case 0:
-//                Log.i("Option", "0");
-//                Intent intent = new Intent(getApplicationContext(), Settings.class);
-//                startActivity(intent);
-////                Toast.makeText(MainActivity.this, "Settings not yet implemented", Toast.LENGTH_LONG).show();
-//                return true;
-//            case 1:
-//                Log.i("Option", "2");
-//                activeBike = 0;
-//                garageSetup();
-//                return true;
-//            case 2:
-//                Log.i("Option", "2");
-//                activeBike = 1;
-//                garageSetup();
-//                return true;
-//            case 3:
-//                Log.i("Option", "3");
-//                activeBike = 2;
-//                garageSetup();
-//                return true;
-//            case 4:
-//                Log.i("Option", "4");
-//                activeBike = 3;
-//                garageSetup();
-//                return true;
-//            case 5:
-//                Log.i("Option", "5");
-//                activeBike = 4;
-//                garageSetup();
-//                return true;
-//            case 6:
-//                Log.i("Option", "6");
-//                activeBike = 5;
-//                garageSetup();
-//                return true;
-//            case 7:
-//                Log.i("Option", "7");
-//                activeBike = 6;
-//                garageSetup();
-//                return true;
-//            case 8:
-//                Log.i("Option", "8");
-//                activeBike = 7;
-//                garageSetup();
-//                return true;
-//            case 9:
-//                Log.i("Option", "9");
-//                activeBike = 8;
-//                garageSetup();
-//                return true;
-//            case 10:
-//                Log.i("Option", "10");
-//                Intent thisIntent = new Intent(getApplicationContext(), AnnualReports.class);
-//                startActivity(thisIntent);
-//                return true;
-//            case 11:
-//                Log.i("Option", "11");
-//                deleteBike();
-//                garageSetup();
-//                return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
+    public void goToMaintenanceLog(View view) {
+        if (activeBike > -1) {
+            hideNew();
+            Intent intent = new Intent(getApplicationContext(), Maintenance.class);
+            startActivity(intent);
+        }
+    }
+
+    public void goToPartsLog(View view) {
+        if (activeBike > -1) {
+            hideNew();
+            Intent intent = new Intent(getApplicationContext(), PartsLog.class);
+            startActivity(intent);
+        }
+    }
+
+    public void goToToDo(View view) {
+        if (activeBike > -1) {
+            hideNew();
+            Intent intent = new Intent(getApplicationContext(), ToDo.class);
+            startActivity(intent);
+        }
+    }
+
+    public void goToFuelling(View view) {
+        if (activeBike > -1) {
+            hideNew();
+            Intent intent = new Intent(getApplicationContext(), Fuelling.class);
+            startActivity(intent);
+        }
+    }
+
+
+    public static void importDB3() {
+        Log.i("ImportDB3", "Started");
+        try {
+            String DB_PATH = "/data/data/com.androidandyuk.autobuddy/databases/Vehicles";
+
+            File sdcard = Environment.getExternalStorageDirectory();
+            String yourDbFileNamePresentInSDCard = sdcard.getAbsolutePath() + File.separator + "AutoBuddy/Vehicles.db";
+
+            Log.i("ImportDB3", "SDCard File " + yourDbFileNamePresentInSDCard);
+
+            File file = new File(yourDbFileNamePresentInSDCard);
+            // Open your local db as the input stream
+            InputStream myInput = new FileInputStream(file);
+
+            // Path to created empty db
+            String outFileName = DB_PATH;
+
+            // Opened assets database structure
+            OutputStream myOutput = new FileOutputStream(outFileName);
+
+            // transfer bytes from the inputfile to the outputfile
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = myInput.read(buffer)) > 0) {
+                myOutput.write(buffer, 0, length);
+            }
+
+            // Close the streams
+            myOutput.flush();
+            myOutput.close();
+            myInput.close();
+        } catch (Exception e) {
+            Log.i("ImportDB", "Exception Caught" + e);
+        }
+        loadBikes();
+        Fuelling.loadFuels();
+        Maintenance.loadLogs();
+        ToDo.loadToDos();
+        Context context = App.getContext();
+        Toast.makeText(context, "Data Imported. Close app and reopen", Toast.LENGTH_LONG).show();
+        if (bikes.size() > 0) {
+            activeBike = 0;
+        }
+    }
+
+
+
+    public void importDB() {
+
+        int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
+        int storage = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        if (storage != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            Log.i("importTrip", "storage !=");
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray
+                    (new String[listPermissionsNeeded.size()]), REQUEST_ID_MULTIPLE_PERMISSIONS);
+            Log.i("importTrip", "listPermissionsNeeded !=");
+        } else {
+            Log.i("importTrip", "importing!");
+            importDB3();
+        }
+    }
+
+    public void importDB2() {
+
+        Uri selectedUri = Uri.parse(Environment.getExternalStorageDirectory().getPath() + "/AutoBuddy/");
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setDataAndType(selectedUri, "*/*");
+        Intent i = Intent.createChooser(intent, "File");
+        startActivityForResult(i, CHOOSE_FILE_REQUESTCODE);
+    }
+
+    public void importDB3new(String yourDbFileNamePresentInSDCard){
+
+        Log.i("ImportDB", "Started");
+        try {
+            //String DB_PATH = "/data/data/com.androidandyuk.autobuddy/databases/sessions";
+            Context context = App.getContext();
+            String DB_PATH = context.getDatabasePath("Vehicles").getPath();
+
+//                        File sdcard = Environment.getExternalStorageDirectory();
+//                        yourDbFileNamePresentInSDCard = sdcard.getAbsolutePath() + File.separator + "LapTimerBuddy/LapTimer.db";
+
+            Log.i("ImportDB", "SDCard File " + yourDbFileNamePresentInSDCard);
+
+            File file = new File(yourDbFileNamePresentInSDCard);
+            // Open your local db as the input stream
+            InputStream myInput = new FileInputStream(file);
+
+            // Path to created empty db
+            String outFileName = DB_PATH;
+
+            // Opened assets database structure
+            OutputStream myOutput = new FileOutputStream(outFileName);
+
+            // transfer bytes from the inputfile to the outputfile
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = myInput.read(buffer)) > 0) {
+                myOutput.write(buffer, 0, length);
+            }
+
+            // Close the streams
+            myOutput.flush();
+            myOutput.close();
+            myInput.close();
+        } catch (Exception e) {
+            Log.i("ImportDB", "Exception Caught" + e);
+        }
+        loadBikes();
+        Fuelling.loadFuels();
+        Maintenance.loadLogs();
+        ToDo.loadToDos();
+        Context context = App.getContext();
+        Toast.makeText(context, "Data Imported. Close app and reopen", Toast.LENGTH_LONG).show();
+        if (bikes.size() > 0) {
+            activeBike = 0;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        switch(requestCode){
+            case CHOOSE_FILE_REQUESTCODE:
+                if(resultCode==-1){
+                    Uri uri = data.getData();
+                    String yourDbFileNamePresentInSDCard = uri.getPath();
+                    importDB3new(yourDbFileNamePresentInSDCard);
+                    //importDB3();
+                }
+                break;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    public void exportDB() {
+        Log.i("exportDB", "Starting");
+
+        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        requestPermissions(permissions, WRITE_REQUEST_CODE);
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case WRITE_REQUEST_CODE:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+                    File sd = Environment.getExternalStorageDirectory();
+                    File data = Environment.getDataDirectory();
+                    FileChannel source = null;
+                    FileChannel destination = null;
+
+                    File dir = new File(Environment.getExternalStorageDirectory() + File.separator + "AutoBuddy");
+                    Log.i("dir is ", "" + dir);
+
+                    try {
+                        if (dir.mkdir()) {
+                            System.out.println("Directory created");
+                        } else {
+                            System.out.println("Directory is not created");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.i("Creating Dir Error", "" + e);
+                    }
+
+                    //String currentDBPath = "/data/com.androidandyuk.autobuddy/databases/Vehicles";
+
+                    Context context = App.getContext();
+                    String currentDBPath = context.getDatabasePath("Vehicles").getPath();
+
+                    String backupDBPath = "/AutoBuddy/Vehicles.db";
+                    File currentDB = new File(data, currentDBPath);
+                    File backupDB = new File(sd, backupDBPath);
+
+                    try {
+                        source = new FileInputStream(currentDB).getChannel();
+                        destination = new FileOutputStream(backupDB).getChannel();
+                        destination.transferFrom(source, 0, source.size());
+                        source.close();
+                        destination.close();
+                        Toast.makeText(context, "DB Exported!", Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        Log.i("Export Failed", "Error");
+                        e.printStackTrace();
+                        Toast.makeText(context, "Export Failed!", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+                else{
+                    //Denied.
+                    Log.i("Permission ", "DENIED");
+                }
+                break;
+        }
+    }
+
+
+
 
     @Override
     public void onBackPressed() {
@@ -1079,38 +1225,13 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
 
         if (id == R.id.nav_garage) {
 
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-            finish();
-
-        } else if (id == R.id.nav_maint) {
-
-            Intent intent = new Intent(getApplicationContext(), Maintenance.class);
-            startActivity(intent);
-
-        } else if (id == R.id.nav_fuel) {
-
-            Intent intent = new Intent(getApplicationContext(), Fuelling.class);
-            startActivity(intent);
-
-        } else if (id == R.id.nav_todo) {
-
-            Intent intent = new Intent(getApplicationContext(), ToDo.class);
-            startActivity(intent);
-
-        } else if (id == R.id.nav_parts) {
-
-            Intent intent = new Intent(getApplicationContext(), PartsLog.class);
-            startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(), ChooseVehicle.class);
+                startActivity(intent);
+                finish();
 
         } else if (id == R.id.nav_settings) {
 
             Intent intent = new Intent(getApplicationContext(), Settings.class);
-            startActivity(intent);
-
-        } else if (id == R.id.nav_reports) {
-
-            Intent intent = new Intent(getApplicationContext(), AnnualReports.class);
             startActivity(intent);
 
         } else if (id == R.id.nav_favs) {
@@ -1138,17 +1259,49 @@ public class Garage extends AppCompatActivity implements NavigationView.OnNaviga
             Intent intent = new Intent(getApplicationContext(), Traffic.class);
             startActivity(intent);
 
-        } else if (id == R.id.nav_delete) {
-
-            deleteBike();
-
-        } else if (id == R.id.nav_backup) {
-
-            Settings.exportDB();
-
         } else if (id == R.id.nav_restore) {
 
-            Settings.importDB();
+            importDB();
+
+        } else if (activeBike > -1) {
+
+            if (id == R.id.nav_maint) {
+
+                Intent intent = new Intent(getApplicationContext(), Maintenance.class);
+                startActivity(intent);
+
+            } else if (id == R.id.nav_fuel) {
+
+                Intent intent = new Intent(getApplicationContext(), Fuelling.class);
+                startActivity(intent);
+
+            } else if (id == R.id.nav_todo) {
+
+                Intent intent = new Intent(getApplicationContext(), ToDo.class);
+                startActivity(intent);
+
+            } else if (id == R.id.nav_parts) {
+
+                Intent intent = new Intent(getApplicationContext(), PartsLog.class);
+                startActivity(intent);
+
+            } else if (id == R.id.nav_reports) {
+
+                Intent intent = new Intent(getApplicationContext(), AnnualReports.class);
+                startActivity(intent);
+
+            } else if (id == R.id.nav_delete) {
+
+                deleteBike();
+
+            } else if (id == R.id.nav_backup) {
+
+                exportDB();
+
+            }
+        } else {
+
+            Toast.makeText(this, "Add a vehicle to your garage first", Toast.LENGTH_SHORT).show();
 
         }
 

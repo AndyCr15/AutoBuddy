@@ -61,6 +61,7 @@ public class ToDo extends AppCompatActivity {
     EditText toDoURL;
     EditText toDoCost;
     Spinner prioritySpinner;
+    TextView currentVehicle;
 
     View toDoDetailsLayout;
     public static View shield;
@@ -92,6 +93,9 @@ public class ToDo extends AppCompatActivity {
 
         toDoDetailsLayout = findViewById(R.id.toDoDetailsLayout);
         shield = findViewById(R.id.shield);
+
+        currentVehicle = findViewById(R.id.currentVehicle);
+        currentVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).make + " " + bikes.get(activeBike).model);
 
         toDoDetails = (EditText) findViewById(R.id.toDoDetails);
         toDoURL = (EditText) findViewById(R.id.toDoURL);

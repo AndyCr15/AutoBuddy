@@ -55,7 +55,7 @@ import static com.androidandyuk.autobuddy.R.id.fuelList;
 
 public class Fuelling extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "Fuelling";
     private AdView mAdView;
 
     public static RelativeLayout main;
@@ -74,6 +74,7 @@ public class Fuelling extends AppCompatActivity {
     EditText mileageText;
     TextView setFuelDate;
     TextView milesDoneTV;
+    TextView currentVehicle;
 
     public static ImageView shield;
 
@@ -95,7 +96,7 @@ public class Fuelling extends AppCompatActivity {
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        mAdView = (AdView) findViewById(R.id.adView);
+        mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
@@ -103,94 +104,97 @@ public class Fuelling extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         fuelingDetailsLayout = findViewById(R.id.fuelingDetailsLayout);
-        shield = (ImageView) findViewById(R.id.shield);
+        shield = findViewById(R.id.shield);
         fuelSummary = findViewById(R.id.fuelSummary);
 
-        main = (RelativeLayout) findViewById(R.id.main);
+        main = findViewById(R.id.main);
 
-        setFuelDate = (TextView) findViewById(R.id.setFuelDate);
-        milesDone = (EditText) findViewById(R.id.milesDone);
-        petrolPrice = (EditText) findViewById(R.id.petrolPrice);
-        litresUsed = (EditText) findViewById(R.id.litresUsed);
-        mileageText = (EditText) findViewById(R.id.mileageET);
+        currentVehicle = findViewById(R.id.currentVehicle);
+        currentVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).make + " " + bikes.get(activeBike).model);
 
-        Log.i("Fuelling", "Loading Fuels");
-        loadFuels();
+        setFuelDate = findViewById(R.id.setFuelDate);
+        milesDone = findViewById(R.id.milesDone);
+        petrolPrice = findViewById(R.id.petrolPrice);
+        litresUsed = findViewById(R.id.litresUsed);
+        mileageText = findViewById(R.id.mileageET);
 
-        initiateList();
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            Log.i("Fuelling", "Loading Fuels");
+            loadFuels();
 
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                // this is for editing a fueling, it stores the info in itemLongPressed
-                itemLongPressedPosition = position;
-                itemLongPressed = bikes.get(activeBike).fuelings.get(position);
-                Log.i("Fuel List", "Tapped " + position);
-                Double thisMileage = bikes.get(activeBike).fuelings.get(position).getMileage();
-                Double thisDone = bikes.get(activeBike).fuelings.get(position).getMiles();
-                // check what setting the user has, Miles or Km
-                // if Km, convert to Miles for display
-                if (milesSetting.equals("Km")) {
-                    thisMileage = thisMileage / conversion;
-                    thisDone = thisDone / conversion;
+            initiateList();
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                    // this is for editing a fueling, it stores the info in itemLongPressed
+                    itemLongPressedPosition = position;
+                    itemLongPressed = bikes.get(activeBike).fuelings.get(position);
+                    Log.i("Fuel List", "Tapped " + position);
+                    Double thisMileage = bikes.get(activeBike).fuelings.get(position).getMileage();
+                    Double thisDone = bikes.get(activeBike).fuelings.get(position).getMiles();
+                    // check what setting the user has, Miles or Km
+                    // if Km, convert to Miles for display
+                    if (milesSetting.equals("Km")) {
+                        thisMileage = thisMileage / conversion;
+                        thisDone = thisDone / conversion;
+                    }
+                    milesDone.setText(oneDecimal.format(thisDone));
+                    petrolPrice.setText(Double.toString(bikes.get(activeBike).fuelings.get(position).getPrice()));
+                    litresUsed.setText(Double.toString(bikes.get(activeBike).fuelings.get(position).getLitres()));
+                    mileageText.setText(oneDecimal.format(thisMileage));
+                    editDate = bikes.get(activeBike).fuelings.get(position).getDate();
+                    setFuelDate.setText(editDate);
+                    fuelingDetailsLayout.setVisibility(View.VISIBLE);
+                    shield.setVisibility(View.VISIBLE);
+
                 }
-                milesDone.setText(oneDecimal.format(thisDone));
-                petrolPrice.setText(Double.toString(bikes.get(activeBike).fuelings.get(position).getPrice()));
-                litresUsed.setText(Double.toString(bikes.get(activeBike).fuelings.get(position).getLitres()));
-                mileageText.setText(oneDecimal.format(thisMileage));
-                editDate = bikes.get(activeBike).fuelings.get(position).getDate();
-                setFuelDate.setText(editDate);
-                fuelingDetailsLayout.setVisibility(View.VISIBLE);
-                shield.setVisibility(View.VISIBLE);
+            });
 
-            }
-        });
+            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    final int fuelPosition = position;
+                    final Context context = App.getContext();
 
-                final int fuelPosition = position;
-                final Context context = App.getContext();
+                    new AlertDialog.Builder(Fuelling.this)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle("Are you sure?")
+                            .setMessage("You're about to delete this log forever...")
+                            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Log.i("Removing", "Log " + fuelPosition);
+                                    bikes.get(activeBike).fuelings.remove(fuelPosition);
+                                    saveFuels();
+                                    initiateList();
+                                    Toast.makeText(context, "Deleted!", Toast.LENGTH_SHORT).show();
 
-                new AlertDialog.Builder(Fuelling.this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle("Are you sure?")
-                        .setMessage("You're about to delete this log forever...")
-                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Log.i("Removing", "Log " + fuelPosition);
-                                bikes.get(activeBike).fuelings.remove(fuelPosition);
-                                saveFuels();
-                                initiateList();
-                                Toast.makeText(context, "Deleted!", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
 
-                            }
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
-
-                return true;
-            }
+                    return true;
+                }
 
 
-        });
+            });
 
+            fuelDateSetListener = new DatePickerDialog.OnDateSetListener()
 
-        fuelDateSetListener = new DatePickerDialog.OnDateSetListener()
-
-        {
-            @Override
-            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                Calendar date = Calendar.getInstance();
-                date.set(year, month, day);
-                String sdfDate = sdf.format(date.getTime());
-                Log.i("Chosen Date", sdfDate);
-                setFuelDate.setText(sdfDate);
-            }
-        };
+            {
+                @Override
+                public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                    Calendar date = Calendar.getInstance();
+                    date.set(year, month, day);
+                    String sdfDate = sdf.format(date.getTime());
+                    Log.i("Chosen Date", sdfDate);
+                    setFuelDate.setText(sdfDate);
+                }
+            };
     }
 
     public void setFuelDate(View view) {
@@ -273,8 +277,8 @@ public class Fuelling extends AppCompatActivity {
     }
 
     private void initiateList() {
-        Log.i("Fuelling", "Initiating List");
-        listView = (ListView) findViewById(fuelList);
+        Log.i(TAG, "Initiating List");
+        listView = findViewById(fuelList);
 
         Log.i("Fuelling", "Setting myAdapter");
         myAdapter = new MyFuelAdapter(bikes.get(activeBike).fuelings);
@@ -545,7 +549,7 @@ public class Fuelling extends AppCompatActivity {
     }
 
     public void checkBackground() {
-        main = (RelativeLayout) findViewById(R.id.main);
+        main = findViewById(R.id.main);
         if (backgroundsWanted) {
             int resID = getResources().getIdentifier("background_portrait", "drawable", this.getPackageName());
             Drawable drawablePic = getResources().getDrawable(resID);

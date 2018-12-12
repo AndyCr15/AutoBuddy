@@ -20,7 +20,7 @@ public class PartsLog extends AppCompatActivity {
 
     public static RelativeLayout main;
 
-    TextView bikeTitle;
+    TextView currentVehicle;
 
     TextView padsMiles;
     TextView padsDate;
@@ -50,7 +50,8 @@ public class PartsLog extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(com.androidandyuk.autobuddy.R.layout.activity_parts_log);
 
-        bikeTitle = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.bikeTitle);
+        currentVehicle = findViewById(R.id.currentVehicle);
+        currentVehicle.setText(bikes.get(activeBike).yearOfMan + " " + bikes.get(activeBike).make + " " + bikes.get(activeBike).model);
 
         padsMiles = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.padsMiles);
         padsDate = (TextView) findViewById(com.androidandyuk.autobuddy.R.id.padsDate);
@@ -76,7 +77,6 @@ public class PartsLog extends AppCompatActivity {
         bikeDetails = findViewById(R.id.bikeDetails);
 
         if(activeBike>=0) {
-            bikeTitle.setText(bikes.get(activeBike).toString());
 
             Bike thisBike = bikes.get(activeBike);
             for (int i = (thisBike.maintenanceLogs.size() - 1); i > -1; i--) {

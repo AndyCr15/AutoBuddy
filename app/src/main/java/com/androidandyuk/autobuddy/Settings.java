@@ -35,7 +35,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.FileChannel;
@@ -53,7 +52,6 @@ import static com.androidandyuk.autobuddy.MainActivity.ed;
 import static com.androidandyuk.autobuddy.MainActivity.incBikeEvents;
 import static com.androidandyuk.autobuddy.MainActivity.incCarEvents;
 import static com.androidandyuk.autobuddy.MainActivity.lastHowManyFuels;
-import static com.androidandyuk.autobuddy.MainActivity.loadBikes;
 import static com.androidandyuk.autobuddy.MainActivity.locationUpdatesTime;
 import static com.androidandyuk.autobuddy.MainActivity.milesSetting;
 import static com.androidandyuk.autobuddy.MainActivity.notiHour;
@@ -80,8 +78,6 @@ public class Settings extends AppCompatActivity {
     Spinner currencySpinner;
     Spinner milesSpinner;
     View settings;
-
-    static final int TIME_DIALOG_ID = 11;
 
     public static ImageView shield;
 
@@ -282,24 +278,17 @@ public class Settings extends AppCompatActivity {
         }
     }
 
-    public void exportDBPressed(View view) {
-        exportDB();
-    }
 
-    public void importDBPressed(View view) {
-        importDB();
-    }
-
-    public static void exportDB() {
+    public static void exportDBorig() {
         Log.i("exportDB", "Starting");
         File sd = Environment.getExternalStorageDirectory();
         File data = Environment.getDataDirectory();
         FileChannel source = null;
         FileChannel destination = null;
 
-        File dir = new File(Environment.getExternalStorageDirectory() + "/AutoBuddy/");
-//        Log.i("dir is ", "" + dir);
-//        dir.mkdir();
+        File dir = new File(Environment.getExternalStorageDirectory() + File.separator + "AutoBuddy");
+        Log.i("dir is ", "" + dir);
+        //dir.mkdir();
         try {
             if (dir.mkdir()) {
                 System.out.println("Directory created");
@@ -324,55 +313,41 @@ public class Settings extends AppCompatActivity {
             destination.close();
             Toast.makeText(context, "DB Exported!", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
+            Log.i("Export Failed", "Error");
             e.printStackTrace();
-            Toast.makeText(context, "Exported Failed!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Export Failed!", Toast.LENGTH_LONG).show();
         }
     }
 
-    public static void importDB() {
-        Log.i("ImportDB", "Started");
-        try {
-            String DB_PATH = "/data/data/com.androidandyuk.autobuddy/databases/Vehicles";
 
-            File sdcard = Environment.getExternalStorageDirectory();
-            String yourDbFileNamePresentInSDCard = sdcard.getAbsolutePath() + File.separator + "AutoBuddy/Vehicles.db";
 
-            Log.i("ImportDB", "SDCard File " + yourDbFileNamePresentInSDCard);
 
-            File file = new File(yourDbFileNamePresentInSDCard);
-            // Open your local db as the input stream
-            InputStream myInput = new FileInputStream(file);
 
-            // Path to created empty db
-            String outFileName = DB_PATH;
 
-            // Opened assets database structure
-            OutputStream myOutput = new FileOutputStream(outFileName);
 
-            // transfer bytes from the inputfile to the outputfile
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = myInput.read(buffer)) > 0) {
-                myOutput.write(buffer, 0, length);
-            }
 
-            // Close the streams
-            myOutput.flush();
-            myOutput.close();
-            myInput.close();
-        } catch (Exception e) {
-            Log.i("ImportDB", "Exception Caught" + e);
-        }
-        loadBikes();
-        Fuelling.loadFuels();
-        Maintenance.loadLogs();
-        ToDo.loadToDos();
-        Context context = App.getContext();
-        Toast.makeText(context, "Data Imported. Close app and reopen", Toast.LENGTH_LONG).show();
-        if (bikes.size() > 0) {
-            activeBike = 0;
-        }
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void goToAbout(View view) {
         // go to about me

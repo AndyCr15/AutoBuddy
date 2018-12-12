@@ -717,7 +717,7 @@ public class MainActivity extends AppCompatActivity {
         try {
 
             vehiclesDB.delete("vehicles", null, null);
-
+            Log.i("saveBikesDB", "TRYING");
             vehiclesDB.execSQL("INSERT INTO vehicles (make, model, reg, bikeId, VIN, serviceDue, MOTdue, lastKnownService, lastKnownMOT, yearOfMan, notes, estMileage, MOTwarned, serviceWarned, taxDue) VALUES ('" +
                     ObjectSerializer.serialize(make) + "' , '" + ObjectSerializer.serialize(model) + "' , '" + ObjectSerializer.serialize(reg) + "' , '" +
                     ObjectSerializer.serialize(bikeId) + "' , '" + ObjectSerializer.serialize(VIN) + "' , '" + ObjectSerializer.serialize(serviceDue) + "' , '" + ObjectSerializer.serialize(MOTdue) + "' , '" +
@@ -725,11 +725,11 @@ public class MainActivity extends AppCompatActivity {
                     ObjectSerializer.serialize(estMileage) + "' , '" + ObjectSerializer.serialize(MOTwarned) + "' , '" + ObjectSerializer.serialize(serviceWarned) + "' , '" + ObjectSerializer.serialize(taxDue) + "')");
 
         } catch (Exception e) {
-
+            Log.i("saveBikesDB", "ERROR");
             e.printStackTrace();
 
         }
-
+        Log.i("saveBikesDB", "COMPLETED");
     }
 
     public static void loadBikesOld() {
